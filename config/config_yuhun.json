@@ -1,0 +1,11 @@
+{
+    "path":"2k/yuhun/",    
+    "endFlag":"end",
+    "zhaohuan":1,
+    "cooperation":{"reject":1},
+    "start":1,
+    "ready":1,
+    "win":2,
+    "end": 1,
+    "fail":1
+}
