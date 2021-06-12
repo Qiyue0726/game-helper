@@ -45,14 +45,14 @@
         "delay":1
     },
     "win":{
-        "similarity":0.95,
+        "similarity":0.9,
         "found":1,
-        "delay":0.2
+        "delay":0.1
     },
     "end":{
         "similarity":0.95,
         "found":1,
-        "delay":0.5
+        "delay":0.1
     },
     "fail":{
         "similarity":0.95,

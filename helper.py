@@ -2,8 +2,10 @@
 from __future__ import print_function
 import ctypes, sys, time, os, random, json
 import cv2
+from cv2 import data
 import win32gui,win32ui,win32api,win32con
 from tqdm import tqdm
+from datetime import datetime
 
 
 class Helper():
@@ -32,7 +34,7 @@ class Helper():
         self.saveBitMap.CreateCompatibleBitmap(self.mfcDC,self.width,self.height)
 
         # Initialize configuration for target pixel and clicking area
-        print("配置文件config_xxx.txt(默认%s，输入xxx)：" % config_file, end="")
+        print("配置文件config_xxx.json(默认%s，输入xxx)：" % config_file, end="")
         config_file_input = input()
         config_file = "./config/config_" + (config_file_input if config_file_input != "" else config_file) + ".json" 
 
@@ -44,14 +46,22 @@ class Helper():
 
 
         # Get the input for total running time
-        # print("运行次数(默认%d)：" % num_runs, end="")
-        # num_runs_input = input()
-        # num_runs = int(num_runs_input) if num_runs_input != "" else num_runs
-        # # Initialize progressing bar with the total running times
-        # self.pbar = tqdm(total=num_runs, ascii=True)
+        print("运行次数(默认%d)：" % num_runs, end="")
+        num_runs_input = input()
+        num_runs = int(num_runs_input) if num_runs_input != "" else num_runs
+
+        print()
+        print('%s 开始运行 %s' % ('*'*20,'*'*20))
+        print()
+        print('配置文件：%s' % config_file)
+        print('运行次数：%d' % num_runs)
+        print()
+
+        # Initialize progressing bar with the total running times
+        self.pbar = tqdm(total=num_runs, ascii=True)
     
     def __del__(self):
-        # self.pbar.close()
+        self.pbar.close()
         # Remove DCs
         win32gui.DeleteObject(self.saveBitMap.GetHandle())
         self.saveDC.DeleteDC()
@@ -122,7 +132,7 @@ class Helper():
                         x = int(center[0]) + random.randrange(int(50 * (self.width / self.device_width))) + offsetX
                         y = int(center[1]) + random.randrange(int(25 * (self.height / self.device_height))) + offsetY
                         self.click(x,y)
-                        print(img,x,y)
+                        # print(img,x,y)
                         time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
                     else:
                         self.recursion(cnf['found'])
@@ -138,8 +148,9 @@ class Helper():
     def run(self):
 
         self.now_img = ''
-        # while self.pbar.n < self.pbar.total:
-        while True:
+        self.time = datetime.now()
+        while self.pbar.n < self.pbar.total:
+        # while True:
 
             while True:
                 self.screenshot()
@@ -147,9 +158,11 @@ class Helper():
                 self.recursion(self.images)
                         
                 if self.now_img == self.endFlag:
-                    break
+                    if (datetime.now() - self.time).seconds >= 5:
+                        self.time = datetime.now()
+                        break
 
-            # self.pbar.update()
+            self.pbar.update()
             time.sleep(0.5 + random.random() * 0.02)
         
           
