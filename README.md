@@ -18,14 +18,20 @@ jajajag 的 [YYS-Helper](https://github.com/jajajag/YYS-Helper) 的项目架构�
 ## 配置文件说明
 ```
 // 文件名一定要以 config_xxx.json 为命名
+// 除说明必填外，其它参数可以设置为null或直接不写
+// found 和 notFound 即为 if 和 else，必须至少存在其中一个
+// found 和 notFound 可以参考配置里面的协作和标记处理
+
 {
-    "path":"2k/yuhun/", // 截图的路径,在 images 文件夹里
-    "endFlag":"end",    // 一个流程的最后一个识别图
-    "img":{             // 需要识别的图片
-        "found":"click",// 如果找到图片进行的操作，可进行嵌套
-        "notFound":"",  // 找不到图片进行的操作，可进行嵌套
-        "offsetX":"",   // 识别图的横坐标偏移量
-        "offsetY":""
+    "path":"2k/yuhun/",     // 必填,截图的路径,在 images 文件夹里
+    "endFlag":"img",        // 必填,一个流程的最后一个识别图
+    "imgName":{             // 需要识别的图片,img 为截图的文件名
+        "similarity":0.95,  // 图片相似度，默认 0.9
+        "found":1,          // 如果找到图片进行的操作，1 表示单击,可进行嵌套,
+        "notFound":null,    // 找不到图片进行的操作，可进行嵌套
+        "offsetX":30,       // 点击的坐标和识别图左上角横坐标的偏移量，默认 0
+        "offsetY":-30,      // 点击的坐标和识别图左上角纵坐标的偏移量，默认 0
+        "delay":0.1,        // 点击后睡眠时间，默认 0
     }
 }
 ```
