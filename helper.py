@@ -9,11 +9,10 @@ from tqdm import tqdm
 class Helper():
 
     def __init__(self,title_name='阴阳师-网易游戏',num_runs=100,config_file = "yuhun",
-                device_width = 2560,device_height= 1440,is_flag='Y'):
+                device_width = 2560,device_height= 1440):
 
         self.device_width = device_width
         self.device_height = device_height
-        self.is_flag = is_flag
         self.handle = win32gui.FindWindow(None,title_name)
 
         #获取句柄窗口的大小信息
@@ -42,22 +41,17 @@ class Helper():
             self.path = config.pop('path')
             self.endFlag = config.pop('endFlag')
             self.images = config
-        
-        # 是否启动标记一号位
-        print(r"是否标记一号位 Y/N (默认%s)：" % is_flag, end="")
-        is_flag_input = input()
-        self.is_flag = is_flag_input if is_flag_input != "" else is_flag
 
 
         # Get the input for total running time
-        print("运行次数(默认%d)：" % num_runs, end="")
-        num_runs_input = input()
-        num_runs = int(num_runs_input) if num_runs_input != "" else num_runs
-        # Initialize progressing bar with the total running times
-        self.pbar = tqdm(total=num_runs, ascii=True)
+        # print("运行次数(默认%d)：" % num_runs, end="")
+        # num_runs_input = input()
+        # num_runs = int(num_runs_input) if num_runs_input != "" else num_runs
+        # # Initialize progressing bar with the total running times
+        # self.pbar = tqdm(total=num_runs, ascii=True)
     
     def __del__(self):
-        self.pbar.close()
+        # self.pbar.close()
         # Remove DCs
         win32gui.DeleteObject(self.saveBitMap.GetHandle())
         self.saveDC.DeleteDC()
@@ -92,7 +86,7 @@ class Helper():
         size = (int(width/ratio), int(height/ratio))
         return cv2.resize(img1, size, interpolation = cv2.INTER_AREA)
 
-    def Image_to_position(self,image, m = 0):
+    def Image_to_position(self,image, m = 0, similarity = 0.9):
         image_path = 'images/' + self.path + str(image) + '.bmp'
         screen = cv2.imread('images/screen.bmp', 0)
         # template = cv2.imread(image_path, 0)
@@ -102,7 +96,7 @@ class Helper():
         result = cv2.matchTemplate(screen, template, methods[m])
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
         # print(max_val)
-        if max_val > 0.93:
+        if max_val >= similarity:
             global center
             # center = (max_loc[0] + image_y / 2, max_loc[1] + image_x / 2)
             center = (max_loc[0], max_loc[1])
@@ -112,60 +106,50 @@ class Helper():
             return False
     
     def recursion(self,images):
-        # 检测是否存在图片，存在则进一步检测看是否可以直接点击，不行则开始递归检测
-        for img in images:
-            if self.Image_to_position(img, m = 0) != False:
-                # 点击后延时
-                if(images[img] == 1):
-                    self.now_img = img
-                    time.sleep(0.2)
-                    x = int(center[0]) + random.randrange(int(50 * (self.width / self.device_width)))
-                    y = int(center[1]) + random.randrange(int(25 * (self.height / self.device_height)))
-                    self.click(x,y)
-                    time.sleep(2)
-                # 点击后立即继续
-                elif(images[img] == 2):
-                    self.now_img = img
-                    time.sleep(0.2)
-                    x = int(center[0]) + random.randrange(int(50 * (self.width / self.device_width)))
-                    y = int(center[1]) + random.randrange(int(25 * (self.height / self.device_height)))
-                    self.click(x,y)
-                else:
-                    self.recursion(images[img])
 
-    # 标记
-    def flag(self):
-        # 检测是否战斗中
-        if self.Image_to_position('object', m = 0) != False:
-            # 检测是否有标记
-            if self.Image_to_position('flag', m = 0) != False:
-                pass
+        for img,cnf in images.items():
+            # 查找图片
+            if self.Image_to_position(img, m = 0,similarity=cnf.get('similarity')) != False:
+                # 找到图片看是否点击或继续递归查找
+                if cnf.get('found') is not None:
+                    # 立即点击
+                    if cnf.get('found') == 1:
+                        self.now_img = img
+                        time.sleep(0.2)
+                        offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0) * (self.width / self.device_width))
+                        offsetY = int((cnf.get('offsetY') if cnf.get('offsetY') is not None else 0) * (self.height / self.device_height))
+
+                        x = int(center[0]) + random.randrange(int(50 * (self.width / self.device_width))) + offsetX
+                        y = int(center[1]) + random.randrange(int(25 * (self.height / self.device_height))) + offsetY
+                        self.click(x,y)
+                        print(img,x,y)
+                        time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
+                    else:
+                        self.recursion(cnf['found'])
             else:
-                # 找到式神并标记
-                if self.Image_to_position('object', m = 0) != False:
-                    x = int(center[0]) +  random.randrange(int(25 * (self.width / self.device_width))) + int(150 * (self.width / self.device_width))
-                    y = int(center[1]) + random.randrange(int(25 * (self.height / self.device_height))) - int(30 * (self.width / self.device_width))
-                    self.click(x,y)
-
+                # 找不到图片看是否有操作或继续递归查找
+                if cnf.get('notFound') is not None:
+                    if cnf.get('notFound') == 'pass':
+                        pass
+                    else:
+                        self.recursion(cnf['notFound'])
 
 
     def run(self):
 
         self.now_img = ''
-        while self.pbar.n < self.pbar.total:
+        # while self.pbar.n < self.pbar.total:
+        while True:
 
             while True:
                 self.screenshot()
-
-                if self.is_flag == 'Y' or self.is_flag == 'y':
-                    self.flag()
 
                 self.recursion(self.images)
                         
                 if self.now_img == self.endFlag:
                     break
 
-            self.pbar.update()
+            # self.pbar.update()
             time.sleep(0.5 + random.random() * 0.02)
         
           
