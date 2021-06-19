@@ -17,7 +17,7 @@ jajajag 的 [YYS-Helper](https://github.com/jajajag/YYS-Helper) 的项目架构�
 
 除此之外，还需要安装以下 python 库
 ```
-pip install opencv-python pywin32 tqdm
+pip install opencv-python pywin32 tqdm keyboard
 ```
 
 ## 配置文件说明
