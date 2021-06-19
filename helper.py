@@ -45,6 +45,8 @@ class Helper():
             config = json.load(f)
             self.path = config.pop('path')
             self.endFlag = config.pop('endFlag')
+            self.timeCost = config.pop('timeCost') # 流程最少耗时，单位秒
+            self.failFlag = config.pop('failFlag')
             self.images = config
 
 
@@ -58,7 +60,7 @@ class Helper():
         print()
         print('配置文件：%s' % config_file)
         print('运行次数：%d' % num_runs)
-        print('按下 F12 暂停运行脚本')
+        print('按下 F12 暂停/运行脚本')
         print()
 
         # Initialize progressing bar with the total running times
@@ -148,7 +150,8 @@ class Helper():
                         if cnf.get('checkAgain') is not None:
                             if cnf.get('checkAgain') == 0:
                                 self.notCheck.append(cnf.get('checkImg'))
-                        if img == 'fail':
+
+                        if img == self.failFlag:
                             self.notCheck = []
                     else:
                         self.recursion(cnf['found'])
@@ -164,27 +167,33 @@ class Helper():
         # print(key)
         self.wait = not self.wait
         if self.wait == True:
-            print('暂停运行')
+            print('暂停运行，按 F12 继续运行')
         else:
-            print('开始运行')
+            print('开始运行，按 F12 暂停运行')
 
     def run(self):
 
         self.now_img = ''
         self.time = datetime.now()
         while self.pbar.n < self.pbar.total:
+            while True:
                 while not self.wait:
                     self.screenshot()
 
                     self.recursion(self.images)
-                            
+
+                    # 一个完整流程结束，可能多次点击 
                     if self.now_img == self.endFlag:
-                        if (datetime.now() - self.time).seconds >= 5:
-                            self.time = datetime.now()
-                            self.notCheck = []
+                        break
+
+                # 判断当前时间与上次一次完整流程的时间差  
+                if (datetime.now() - self.time).seconds >= self.timeCost:
+                    self.time = datetime.now()
+                    self.notCheck = []
+                    break
                             
-                            self.pbar.update()
-                            time.sleep(0.5 + random.random() * 0.02)
+            self.pbar.update()
+            time.sleep(0.5 + random.random() * 0.02)
         
           
 

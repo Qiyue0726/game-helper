@@ -30,7 +30,9 @@ pip install opencv-python pywin32 tqdm keyboard
 
 {
     "path":"2k/yuhun/",         // 必填,截图的路径,在 images 文件夹里
+    "timeCost": 5,              // 一个完整流程的最少耗时
     "endFlag":"img",            // 必填,一个流程的最后一个识别图
+    "failFlag": "fail",         // 必填,一个流程失败的识别图
     "imgName":{                 // 需要识别的图片,img 为截图的文件名
         "similarity":0.95,      // 图片相似度，默认 0.9
         "found":1,              // 如果找到图片进行的操作，可进行嵌套,

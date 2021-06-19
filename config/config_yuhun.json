@@ -1,6 +1,8 @@
 {
     "path": "2k/yuhun/",
+    "timeCost": 5,
     "endFlag": "end",
+    "failFlag": "fail",
     "cooperation": {
         "similarity": 0.95,
         "found": {
