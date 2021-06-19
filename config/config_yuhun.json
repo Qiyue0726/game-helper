@@ -1,62 +1,64 @@
 {
-    "path":"2k/yuhun/",    
-    "endFlag":"end",
-    "cooperation":{
-        "similarity":0.95,
-        "found":{
-            "reject":{
-                "similarity":0.95,
-                "found":1,
-                "delay":0.5
+    "path": "2k/yuhun/",
+    "endFlag": "end",
+    "cooperation": {
+        "similarity": 0.95,
+        "found": {
+            "reject": {
+                "similarity": 0.95,
+                "found": 1,
+                "delay": 0.5
             }
         },
-        "notFound":null,
-        "delay":0,
-        "offsetX":null,
-        "offsetY":null
+        "notFound": null,
+        "delay": 0,
+        "offsetX": null,
+        "offsetY": null
     },
-    "start":{
-        "similarity":0.95,
-        "found":1,
-        "delay":1
+    "start": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 1
     },
-    "fighting":{
-        "similarity":0.95,
-        "found":{
-            "flag":{
-                "similarity":0.93,
-                "found":null,
-                "notFound":{
-                    "fighting":{
-                        "similarity":0.95,
-                        "found":1,
-                        "notFound":null,
-                        "delay":0.5,
-                        "offsetX":150,
-                        "offsetY":-30
+    "fighting": {
+        "similarity": 0.95,
+        "found": {
+            "flag": {
+                "similarity": 0.92,
+                "found": null,
+                "notFound": {
+                    "fighting": {
+                        "similarity": 0.95,
+                        "found": 1,
+                        "notFound": null,
+                        "delay": 1,
+                        "offsetX": 150,
+                        "offsetY": -30,
+                        "checkAgain": 0,
+                        "checkImg": "fighting"
                     }
                 }
             }
         }
     },
-    "ready":{
-        "similarity":0.95,
-        "found":1,
-        "delay":1
+    "ready": {
+        "similarity": 0.95,
+        "found": 1,
+        "delay": 1
     },
-    "win":{
-        "similarity":0.9,
-        "found":1,
-        "delay":0.1
+    "win": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 0.1
     },
-    "end":{
-        "similarity":0.95,
-        "found":1,
-        "delay":0.1
+    "end": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 0.1
     },
-    "fail":{
-        "similarity":0.95,
-        "found":1,
-        "delay":0.5
+    "fail": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 0.5
     }
 }

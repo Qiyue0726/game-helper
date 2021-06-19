@@ -16,6 +16,7 @@ class Helper():
         self.device_width = device_width
         self.device_height = device_height
         self.handle = win32gui.FindWindow(None,title_name)
+        self.notCheck = []
 
         #获取句柄窗口的大小信息
         left, top, right, bot = win32gui.GetWindowRect(self.handle)
@@ -118,8 +119,12 @@ class Helper():
     def recursion(self,images):
 
         for img,cnf in images.items():
+            if img in self.notCheck:
+                continue
+
+            similarity = cnf.get('similarity') if cnf.get('similarity') is not None else 0.9
             # 查找图片
-            if self.Image_to_position(img, m = 0,similarity=cnf.get('similarity')) != False:
+            if self.Image_to_position(img, m = 0,similarity=similarity) != False:
                 # 找到图片看是否点击或继续递归查找
                 if cnf.get('found') is not None:
                     # 立即点击
@@ -134,6 +139,12 @@ class Helper():
                         self.click(x,y)
                         # print(img,x,y)
                         time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
+                        # 单次流程不再检查
+                        if cnf.get('checkAgain') is not None:
+                            if cnf.get('checkAgain') == 0:
+                                self.notCheck.append(cnf.get('checkImg'))
+                        if img == 'fail':
+                            self.notCheck = []
                     else:
                         self.recursion(cnf['found'])
             else:
@@ -160,6 +171,7 @@ class Helper():
                 if self.now_img == self.endFlag:
                     if (datetime.now() - self.time).seconds >= 5:
                         self.time = datetime.now()
+                        self.notCheck = []
                         break
 
             self.pbar.update()
