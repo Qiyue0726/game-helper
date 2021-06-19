@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 from __future__ import print_function
 import ctypes, sys, time, os, random, json
+import keyboard
 import cv2
 from cv2 import data
 import win32gui,win32ui,win32api,win32con
@@ -17,6 +18,7 @@ class Helper():
         self.device_height = device_height
         self.handle = win32gui.FindWindow(None,title_name)
         self.notCheck = []
+        self.wait = False # 暂停
 
         #获取句柄窗口的大小信息
         left, top, right, bot = win32gui.GetWindowRect(self.handle)
@@ -56,10 +58,13 @@ class Helper():
         print()
         print('配置文件：%s' % config_file)
         print('运行次数：%d' % num_runs)
+        print('按下 F12 暂停运行脚本')
         print()
 
         # Initialize progressing bar with the total running times
         self.pbar = tqdm(total=num_runs, ascii=True)
+
+        keyboard.on_press_key("F12", self.pause)
     
     def __del__(self):
         self.pbar.close()
@@ -155,27 +160,31 @@ class Helper():
                     else:
                         self.recursion(cnf['notFound'])
 
+    def pause(self,key):
+        # print(key)
+        self.wait = not self.wait
+        if self.wait == True:
+            print('暂停运行')
+        else:
+            print('开始运行')
 
     def run(self):
 
         self.now_img = ''
         self.time = datetime.now()
         while self.pbar.n < self.pbar.total:
-        # while True:
+                while not self.wait:
+                    self.screenshot()
 
-            while True:
-                self.screenshot()
-
-                self.recursion(self.images)
-                        
-                if self.now_img == self.endFlag:
-                    if (datetime.now() - self.time).seconds >= 5:
-                        self.time = datetime.now()
-                        self.notCheck = []
-                        break
-
-            self.pbar.update()
-            time.sleep(0.5 + random.random() * 0.02)
+                    self.recursion(self.images)
+                            
+                    if self.now_img == self.endFlag:
+                        if (datetime.now() - self.time).seconds >= 5:
+                            self.time = datetime.now()
+                            self.notCheck = []
+                            
+                            self.pbar.update()
+                            time.sleep(0.5 + random.random() * 0.02)
         
           
 

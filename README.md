@@ -29,15 +29,17 @@ pip install opencv-python pywin32 tqdm
 // found 和 notFound 可以参考配置里面的协作和标记处理
 
 {
-    "path":"2k/yuhun/",     // 必填,截图的路径,在 images 文件夹里
-    "endFlag":"img",        // 必填,一个流程的最后一个识别图
-    "imgName":{             // 需要识别的图片,img 为截图的文件名
-        "similarity":0.95,  // 图片相似度，默认 0.9
-        "found":1,          // 如果找到图片进行的操作，可进行嵌套,
-        "notFound":null,    // 找不到图片进行的操作，可进行嵌套
-        "offsetX":30,       // 点击的坐标和识别图左上角横坐标的偏移量，默认 0
-        "offsetY":-30,      // 点击的坐标和识别图左上角纵坐标的偏移量，默认 0
-        "delay":0.1,        // 点击后睡眠时间，默认 0
+    "path":"2k/yuhun/",         // 必填,截图的路径,在 images 文件夹里
+    "endFlag":"img",            // 必填,一个流程的最后一个识别图
+    "imgName":{                 // 需要识别的图片,img 为截图的文件名
+        "similarity":0.95,      // 图片相似度，默认 0.9
+        "found":1,              // 如果找到图片进行的操作，可进行嵌套,
+        "notFound":null,        // 找不到图片进行的操作，可进行嵌套
+        "offsetX":30,           // 点击的坐标和识别图左上角横坐标的偏移量，默认 0
+        "offsetY":-30,          // 点击的坐标和识别图左上角纵坐标的偏移量，默认 0
+        "delay":0.1,            // 点击后睡眠时间，默认 0
+        "checkAgain": 0,        // 是否重复检测，0 否
+        "checkImg": "fighting"  // 不重复检测的图片
     }
 }
 ```

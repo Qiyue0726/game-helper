@@ -54,7 +54,9 @@
     "end": {
         "similarity": 0.93,
         "found": 1,
-        "delay": 0.1
+        "delay": 0.1,
+        "offsetX": 150,
+        "offsetY": -50
     },
     "fail": {
         "similarity": 0.93,
