@@ -1,0 +1,67 @@
+{
+    "path": "2k/tansuo/",
+    "timeCost": 5,
+    "endFlag": "showAward",
+    "failFlag": "fail",
+    "cooperation": {
+        "similarity": 0.95,
+        "found": {
+            "reject": {
+                "similarity": 0.95,
+                "found": 1,
+                "delay": 0.5
+            }
+        },
+        "notFound": null,
+        "delay": 0,
+        "offsetX": null,
+        "offsetY": null
+    },
+    "tansuo": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 1
+    },
+    "win": {
+        "similarity": 0.9,
+        "found": 3,
+        "delay":0.1
+    },
+    "end": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 0.1,
+        "offsetX": 150,
+        "offsetY": -50
+    },
+    "fail": {
+        "similarity": 0.97,
+        "found": 1,
+        "delay": 0.5
+    },
+    "award": {
+        "similarity": 0.93,
+        "found": 1,
+        "notFound":{
+            "boss": {
+                "similarity": 0.93,
+                "found": 1,
+                "delay": 0.3,
+                "notFound": {
+                    "fight":{
+                        "similarity": 0.93,
+                        "found": 1,
+                        "delay": 1
+                    }
+                }
+            }
+        },
+        "delay":0.5
+    },
+    "showAward":{
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 0.1,
+        "offsetX": -150
+    }
+}
