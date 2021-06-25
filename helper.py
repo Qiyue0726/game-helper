@@ -11,13 +11,14 @@ from datetime import datetime
 
 class Helper():
 
-    def __init__(self,title_name='阴阳师-网易游戏',num_runs=100,config_file = "yuhun",
+    def __init__(self,title_name='阴阳师-网易游戏',num_runs=100,config_file_index = 0,
                 device_width = 2560,device_height= 1440):
 
         self.device_width = device_width
         self.device_height = device_height
         self.handle = win32gui.FindWindow(None,title_name)
         self.notCheck = []
+        self.failNum = 0
         self.wait = False # 暂停
 
         #获取句柄窗口的大小信息
@@ -37,17 +38,23 @@ class Helper():
         self.saveBitMap.CreateCompatibleBitmap(self.mfcDC,self.width,self.height)
 
         # Initialize configuration for target pixel and clicking area
-        print("配置文件config_xxx.json(默认%s，输入xxx)：" % config_file, end="")
-        config_file_input = input()
-        config_file = "./config/config_" + (config_file_input if config_file_input != "" else config_file) + ".json" 
+        print("选择配置文件")
+        for files in os.walk('./configs'):
+            for index,file in enumerate(files[2]):
+                print('[%d] %s' % (index,os.path.splitext(file)[0][7:]))
+            print()
+            print('默认选择 [%d]，请输入：' % config_file_index,end="")
+            config_file_input = input()
+            config_file = './configs/' + (files[2][int(config_file_input)] if config_file_input != "" else files[2][int(config_file_index)])
+            # print(config_file)
 
-        with open(config_file,'r') as f:
-            config = json.load(f)
-            self.path = config.pop('path')
-            self.endFlag = config.pop('endFlag')
-            self.timeCost = config.pop('timeCost') # 流程最少耗时，单位秒
-            self.failFlag = config.pop('failFlag')
-            self.images = config
+            with open(config_file,'r') as f:
+                config = json.load(f)
+                self.path = config.pop('path')
+                self.endFlag = config.pop('endFlag')
+                self.timeCost = config.pop('timeCost') # 流程最少耗时，单位秒
+                self.failFlag = config.pop('failFlag')
+                self.images = config
 
 
         # Get the input for total running time
@@ -135,7 +142,7 @@ class Helper():
                 # 找到图片看是否点击或继续递归查找
                 if cnf.get('found') is not None:
                     # 立即点击
-                    if cnf.get('found') == 1:
+                    if type(cnf.get('found')) == int:
                         self.now_img = img
                         time.sleep(0.2)
                         offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0) * (self.width / self.device_width))
@@ -143,16 +150,16 @@ class Helper():
 
                         x = int(center[0]) + random.randrange(int(50 * (self.width / self.device_width))) + offsetX
                         y = int(center[1]) + random.randrange(int(25 * (self.height / self.device_height))) + offsetY
-                        self.click(x,y)
-                        # print(img,x,y)
-                        time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
+                        for i in range(cnf.get('found')):
+                            self.click(x,y)
+                            # print(img,x,y)
+                            time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
+
                         # 单次流程不再检查
                         if cnf.get('checkAgain') is not None:
                             if cnf.get('checkAgain') == 0:
                                 self.notCheck.append(cnf.get('checkImg'))
 
-                        if img == self.failFlag:
-                            self.notCheck = []
                     else:
                         self.recursion(cnf['found'])
             else:
@@ -184,16 +191,17 @@ class Helper():
 
                     # 一个完整流程结束，可能多次点击 
                     if self.now_img == self.endFlag:
-                        break
-
-                # 判断当前时间与上次一次完整流程的时间差  
-                if (datetime.now() - self.time).seconds >= self.timeCost:
-                    self.time = datetime.now()
-                    self.notCheck = []
-                    break
-                            
-            self.pbar.update()
-            time.sleep(0.5 + random.random() * 0.02)
+                        # 判断当前时间与上次一次完整流程的时间差  
+                        if (datetime.now() - self.time).seconds >= self.timeCost:
+                            self.time = datetime.now()
+                            self.notCheck = []
+                            self.pbar.update()
+                            time.sleep(0.5 + random.random() * 0.02)
+                    elif self.now_img == self.failFlag:
+                        self.failNum += 1
+                        self.notCheck = []
+                        print('已失败 %d 次！！！' % self.failNum)
+                        time.sleep(2 + random.random() * 0.02)
         
           
 
@@ -208,11 +216,11 @@ if __name__ == '__main__':
 
         device_width=2560
         device_height=1440
-        config_file = "yuhun"
+        config_file_index = 0
 
         
             
-        helper = Helper(title_name='阴阳师-网易游戏', config_file = config_file,
+        helper = Helper(title_name='阴阳师-网易游戏', config_file_index = config_file_index,
             device_width=device_width,device_height=device_height)
         helper.run()
     else:

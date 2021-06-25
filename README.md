@@ -25,7 +25,7 @@ pip install opencv-python pywin32 tqdm keyboard
 // 文件名一定要以 config_xxx.json 为命名
 // 除说明必填外，其它参数可以设置为null或直接不写
 // found 和 notFound 即为 if 和 else，必须至少存在其中一个
-// found 目前的参数仅支持图片嵌套 和 填写 1 表示单击
+// found 目前的参数仅支持图片嵌套 和 填写数字 表示单击次数
 // found 和 notFound 可以参考配置里面的协作和标记处理
 
 {
@@ -39,7 +39,7 @@ pip install opencv-python pywin32 tqdm keyboard
         "notFound":null,        // 找不到图片进行的操作，可进行嵌套
         "offsetX":30,           // 点击的坐标和识别图左上角横坐标的偏移量，默认 0
         "offsetY":-30,          // 点击的坐标和识别图左上角纵坐标的偏移量，默认 0
-        "delay":0.1,            // 点击后睡眠时间，默认 0
+        "delay":0.1,            // 每点击一次后睡眠时间，默认 0
         "checkAgain": 0,        // 是否重复检测，0 否
         "checkImg": "fighting"  // 不重复检测的图片
     }
