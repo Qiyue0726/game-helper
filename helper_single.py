@@ -182,37 +182,38 @@ class Helper():
 
         self.now_img = ''
         self.time = datetime.now()
-        while self.pbar.n < self.pbar.total:
-            while True:
-                while not self.wait:
-                    self.screenshot()
+        while True:
+            while not self.wait:
+                self.screenshot()
 
-                    self.recursion(self.images)
+                self.recursion(self.images)
 
-                    # 一个完整流程结束，可能多次点击 
-                    if self.now_img == self.endFlag:
-                        # 判断当前时间与上次一次完整流程的时间差  
-                        if (datetime.now() - self.time).seconds >= self.timeCost:
-                            self.time = datetime.now()
-                            self.notCheck = []
-                            self.pbar.update()
-                            time.sleep(0.5 + random.random() * 0.02)
-                    elif self.now_img == self.failFlag:
-                        self.failNum += 1
+                # 一个完整流程结束，可能多次点击 
+                if self.now_img == self.endFlag:
+                    # 判断当前时间与上次一次完整流程的时间差  
+                    if (datetime.now() - self.time).seconds >= self.timeCost:
+                        self.time = datetime.now()
                         self.notCheck = []
-                        print('已失败 %d 次！！！' % self.failNum)
-                        time.sleep(2 + random.random() * 0.02)
+                        self.pbar.update()
+                        if self.pbar.n >= self.pbar.total:
+                            return
+                        time.sleep(0.5 + random.random() * 0.02)
+                elif self.now_img == self.failFlag:
+                    self.failNum += 1
+                    self.notCheck = []
+                    print('已失败 %d 次！！！' % self.failNum)
+                    time.sleep(2 + random.random() * 0.02)
         
           
 
-def is_admin():
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except:
-            return False
+# def is_admin():
+#         try:
+#             return ctypes.windll.shell32.IsUserAnAdmin()
+#         except:
+#             return False
 
 if __name__ == '__main__': 
-    if is_admin():
+    # if is_admin():
 
         device_width=2560
         device_height=1440
@@ -223,7 +224,8 @@ if __name__ == '__main__':
         helper = Helper(title_name='阴阳师-网易游戏', config_file_index = config_file_index,
             device_width=device_width,device_height=device_height)
         helper.run()
-    else:
-        if sys.version_info[0] == 3:
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)  
+        helper.__del__()
+    # else:
+    #     if sys.version_info[0] == 3:
+    #         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)  
    
