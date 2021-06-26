@@ -43,7 +43,7 @@ class Helper():
                 else:
                     self.handles.append(handle)
 
-        if len(handle) > 1:
+        if len(self.handles) > 1:
             print('请输入需要设置为队长/开车的窗口索引（左上角标题序号）:')
             self.main_handle_index = input()
             
@@ -51,7 +51,7 @@ class Helper():
         for index,handle in enumerate(self.handles):
             win32gui.SetWindowText(handle, self.title_name + ' - ' + str(index + 1))
             #获取句柄窗口的大小信息
-            left, top, right, bot = win32gui.GetWindowRect(self.handle)
+            left, top, right, bot = win32gui.GetWindowRect(handle)
             width = right - left
             height = bot - top
             # print(width,height)
@@ -60,7 +60,7 @@ class Helper():
             #创建设备描述表
             mfcDC = win32ui.CreateDCFromHandle(handleDC)
             #创建内存设备描述表
-            saveDC = self.mfcDC.CreateCompatibleDC()
+            saveDC = mfcDC.CreateCompatibleDC()
             #创建位图对象准备保存图片
             saveBitMap = win32ui.CreateBitmap()
             #为bitmap开辟存储空间
@@ -115,7 +115,7 @@ class Helper():
     def __del__(self):
         self.pbar.close()
         for index,handle in enumerate(self.handles):
-            win32gui.SetWindowText(handle,self.title_name)
+            win32gui.SetWindowText(handle,'self.title_name')
             # Remove DCs
             win32gui.DeleteObject(self.saveBitMaps[index].GetHandle())
             self.saveDCs[index].DeleteDC()
@@ -169,7 +169,7 @@ class Helper():
         else:
             return False
     
-    def recursion(self,images):
+    def recursion(self,images,handle_index):
 
         for img,cnf in images.items():
             if img in self.notCheck:
@@ -184,13 +184,13 @@ class Helper():
                     if type(cnf.get('found')) == int:
                         self.now_img = img
                         time.sleep(0.2)
-                        offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0) * (self.width / self.device_width))
-                        offsetY = int((cnf.get('offsetY') if cnf.get('offsetY') is not None else 0) * (self.height / self.device_height))
+                        offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0) * (self.widths[handle_index] / self.device_width))
+                        offsetY = int((cnf.get('offsetY') if cnf.get('offsetY') is not None else 0) * (self.heights[handle_index] / self.device_height))
 
-                        x = int(center[0]) + random.randrange(int(50 * (self.width / self.device_width))) + offsetX
-                        y = int(center[1]) + random.randrange(int(25 * (self.height / self.device_height))) + offsetY
+                        x = int(center[0]) + random.randrange(int(50 * (self.widths[handle_index] / self.device_width))) + offsetX
+                        y = int(center[1]) + random.randrange(int(25 * (self.heights[handle_index] / self.device_height))) + offsetY
                         for i in range(cnf.get('found')):
-                            self.click(x,y)
+                            self.click(x,y,handle_index)
                             # print(img,x,y)
                             time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
 
@@ -200,14 +200,14 @@ class Helper():
                                 self.notCheck.append(cnf.get('checkImg'))
 
                     else:
-                        self.recursion(cnf['found'])
+                        self.recursion(cnf['found'],handle_index)
             else:
                 # 找不到图片看是否有操作或继续递归查找
                 if cnf.get('notFound') is not None:
                     if cnf.get('notFound') == 'pass':
                         pass
                     else:
-                        self.recursion(cnf['notFound'])
+                        self.recursion(cnf['notFound'],handle_index)
 
     def pause(self,key):
         # print(key)
@@ -221,12 +221,13 @@ class Helper():
 
         self.now_img = ''
         self.time = datetime.now()
-        while self.pbar.n < self.pbar.total:
-            while True:
-                while not self.wait:
-                    self.screenshot()
+        while True:
+            while not self.wait:
+                
+                for index,handle in enumerate(self.handles):
+                    self.screenshot(index)
 
-                    self.recursion(self.images)
+                    self.recursion(self.images,index)
 
                     # 一个完整流程结束，可能多次点击 
                     if self.now_img == self.endFlag:
@@ -235,6 +236,8 @@ class Helper():
                             self.time = datetime.now()
                             self.notCheck = []
                             self.pbar.update()
+                            if self.pbar.n >= self.pbar.total:
+                                return
                             time.sleep(0.5 + random.random() * 0.02)
                     elif self.now_img == self.failFlag:
                         self.failNum += 1
@@ -244,14 +247,7 @@ class Helper():
         
           
 
-def is_admin():
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except:
-            return False
-
 if __name__ == '__main__': 
-    # if is_admin():
 
         device_width=2560
         device_height=1440
@@ -262,7 +258,5 @@ if __name__ == '__main__':
         helper = Helper(title_name='阴阳师-网易游戏', config_file_index = config_file_index,
             device_width=device_width,device_height=device_height)
         helper.run()
-    # else:
-    #     if sys.version_info[0] == 3:
-    #         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)  
-   
+        helper.__del__()
+    
