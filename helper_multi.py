@@ -17,6 +17,9 @@ class Helper():
         self.title_name = title_name
         self.device_width = device_width
         self.device_height = device_height
+        self.pbars = []
+        self.times = {}
+        self.now_imgs = {}
         self.notCheck = []
         self.failNum = 0
         self.wait = False # 暂停
@@ -43,13 +46,10 @@ class Helper():
                 else:
                     self.handles.append(handle)
 
-        if len(self.handles) > 1:
-            print('请输入需要设置为队长/开车的窗口索引（左上角标题序号）:')
-            self.main_handle_index = input()
-            
         
         for index,handle in enumerate(self.handles):
-            win32gui.SetWindowText(handle, self.title_name + ' - ' + str(index + 1))
+            # 设置窗口标题
+            # win32gui.SetWindowText(handle, self.title_name + ' - ' + str(index + 1))
             #获取句柄窗口的大小信息
             left, top, right, bot = win32gui.GetWindowRect(handle)
             width = right - left
@@ -72,6 +72,11 @@ class Helper():
             self.mfcDCs.append(mfcDC)
             self.saveDCs.append(saveDC)
             self.saveBitMaps.append(saveBitMap)
+        
+        if len(self.handles) > 1:
+            print('请选择需要设置为队长/开车的窗口索引（左上角标题序号）')
+            print('默认选择 [1]，请输入：', end="")
+            self.main_handle_index = input()
 
 
         # 选择配置文件并解析
@@ -95,7 +100,7 @@ class Helper():
 
 
         # Get the input for total running time
-        print("运行次数(默认%d)：" % num_runs, end="")
+        print("每个窗口运行次数(默认%d)：" % num_runs, end="")
         num_runs_input = input()
         num_runs = int(num_runs_input) if num_runs_input != "" else num_runs
 
@@ -103,18 +108,23 @@ class Helper():
         print('%s 开始运行 %s' % ('*'*20,'*'*20))
         print()
         print('配置文件：%s' % config_file)
-        print('运行次数：%d' % num_runs)
+        print('每个窗口运行次数：%d' % num_runs)
         print('按下 F12 暂停/运行脚本')
         print()
 
         # Initialize progressing bar with the total running times
-        self.pbar = tqdm(total=num_runs, ascii=True)
+        for index,handle in enumerate(self.handles):
+            self.pbars.append(tqdm(total=num_runs, ascii=True, desc=self.title_name + "-%d" % (index+1)))
+            self.times[index] = datetime.now()
+            self.now_imgs[index] = ""
+
 
         keyboard.on_press_key("F12", self.pause)
+        keyboard.on_press_key("ESC", self.__del__)
     
     def __del__(self):
-        self.pbar.close()
         for index,handle in enumerate(self.handles):
+            self.pbars[index].close()
             win32gui.SetWindowText(handle,'self.title_name')
             # Remove DCs
             win32gui.DeleteObject(self.saveBitMaps[index].GetHandle())
@@ -124,6 +134,7 @@ class Helper():
 
 
     def click(self,x, y, handle_index):
+        # print('click %d' % handle_index)
         long_position = win32api.MAKELONG(x,y)
 
         win32api.SendMessage(self.handles[handle_index], win32con.WM_LBUTTONDOWN, 0, long_position)  # 模拟鼠标按下
@@ -182,7 +193,7 @@ class Helper():
                 if cnf.get('found') is not None:
                     # 立即点击
                     if type(cnf.get('found')) == int:
-                        self.now_img = img
+                        self.now_imgs[handle_index] = img
                         time.sleep(0.2)
                         offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0) * (self.widths[handle_index] / self.device_width))
                         offsetY = int((cnf.get('offsetY') if cnf.get('offsetY') is not None else 0) * (self.heights[handle_index] / self.device_height))
@@ -219,31 +230,39 @@ class Helper():
 
     def run(self):
 
-        self.now_img = ''
-        self.time = datetime.now()
+        notFinishHandle = self.handles
+        # finishHandle = []
         while True:
             while not self.wait:
+
+                if len(notFinishHandle):
                 
-                for index,handle in enumerate(self.handles):
-                    self.screenshot(index)
+                    for index,handle in enumerate(notFinishHandle):
 
-                    self.recursion(self.images,index)
+                        self.screenshot(index)
 
-                    # 一个完整流程结束，可能多次点击 
-                    if self.now_img == self.endFlag:
-                        # 判断当前时间与上次一次完整流程的时间差  
-                        if (datetime.now() - self.time).seconds >= self.timeCost:
-                            self.time = datetime.now()
+                        self.recursion(self.images,index)
+
+                        # 一个完整流程结束，可能多次点击 
+                        if self.now_imgs[index] == self.endFlag:
+                            # 判断当前时间与上次一次完整流程的时间差  
+                            if (datetime.now() - self.times[index]).seconds >= self.timeCost:
+                                self.times[index] = datetime.now()
+                                self.notCheck = []
+                                self.pbars[index].update()
+                                print('%d , %d' % (index,self.pbars[index].n))
+                                if self.pbars[index].n >= self.pbars[index].total:
+                                    # finishHandle.append(handle)
+                                    del notFinishHandle[index]
+
+                                time.sleep(0.5 + random.random() * 0.02)
+                        elif self.now_imgs[index] == self.failFlag:
+                            self.failNum += 1
                             self.notCheck = []
-                            self.pbar.update()
-                            if self.pbar.n >= self.pbar.total:
-                                return
-                            time.sleep(0.5 + random.random() * 0.02)
-                    elif self.now_img == self.failFlag:
-                        self.failNum += 1
-                        self.notCheck = []
-                        print('已失败 %d 次！！！' % self.failNum)
-                        time.sleep(2 + random.random() * 0.02)
+                            print('已失败 %d 次！！！' % self.failNum)
+                            time.sleep(2 + random.random() * 0.02)
+                else:
+                    return
         
           
 
