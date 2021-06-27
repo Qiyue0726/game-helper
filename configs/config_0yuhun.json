@@ -1,6 +1,6 @@
 {
     "path": "2k/yuhun/",
-    "timeCost": 5,
+    "timeCost": 3,
     "endFlag": "end",
     "failFlag": "fail",
     "cooperation": {
@@ -24,6 +24,7 @@
     },
     "fighting": {
         "similarity": 0.95,
+        "exclusive": true,
         "found": {
             "flag": {
                 "similarity": 0.92,
@@ -51,17 +52,17 @@
     "win": {
         "similarity": 0.93,
         "found": 3,
-        "delay": 0.1
+        "delay": 0.2
     },
     "end": {
         "similarity": 0.93,
-        "found": 1,
-        "delay": 0.1,
+        "found": 2,
+        "delay": 0.2,
         "offsetX": 150,
         "offsetY": -50
     },
     "fail": {
-        "similarity": 0.93,
+        "similarity": 0.97,
         "found": 1,
         "delay": 0.5
     }

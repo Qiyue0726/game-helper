@@ -16,6 +16,7 @@ class Helper():
                 device_width = 2560,device_height= 1440):
 
         self.title_name = title_name
+        self.title_name_len = len(title_name)
         self.num_runs = num_runs
         self.device_width = device_width
         self.device_height = device_height
@@ -52,7 +53,9 @@ class Helper():
         
         for index,handle in enumerate(self.handles):
             # 设置窗口标题
-            # win32gui.SetWindowText(handle, self.title_name + ' - ' + str(index + 1))
+            win32gui.SetWindowText(handle, self.title_name + ' - ' + str(index + 1))
+            
+            self.title_name_len = len(self.title_name  + ' - ' + str(index + 1))
             #获取句柄窗口的大小信息
             left, top, right, bot = win32gui.GetWindowRect(handle)
             width = right - left
@@ -112,15 +115,18 @@ class Helper():
         print('%s 开始运行 %s' % ('*'*20,'*'*20))
         print()
         print('配置文件：%s' % config_file)
-        print('每个窗口运行次数：%d' % num_runs)
+        print('队长/开车的窗口索引：%d' % int(self.main_handle_index + 1))
+        print('每个窗口运行次数：%d' % self.num_runs)
+        print()
         print('按下 F12 暂停/运行脚本')
+        print('按下 ESC 结束脚本')
         print()
 
         # self.progress_manager = MultiProgressManager()
         # Initialize progressing bar with the total running times
         for index,handle in enumerate(self.handles):
             # self.progress_manager.put(str(index), LineProgress(total=self.num_runs, title=self.title_name + "-%d" % (index+1), width=50))
-            self.pbars.append(tqdm(total=num_runs, ascii=True, desc=self.title_name + "-%d" % (index+1),position=0))
+            self.pbars.append(tqdm(total=self.num_runs, ascii=True, desc=self.title_name + "-%d" % (index+1),position=0))
             self.play_nums[index] = 0
             self.times[index] = datetime.now()
             self.now_imgs[index] = ""
@@ -129,12 +135,12 @@ class Helper():
 
 
         keyboard.on_press_key("F12", self.pause)
-        keyboard.on_press_key("ESC", self.__del__)
+        keyboard.on_press_key("ESC", self.exit)
     
     def __del__(self):
         for index,handle in enumerate(self.handles):
             self.pbars[index].close()
-            win32gui.SetWindowText(handle,'self.title_name')
+            win32gui.SetWindowText(handle,self.title_name)
             # Remove DCs
             win32gui.DeleteObject(self.saveBitMaps[index].GetHandle())
             self.saveDCs[index].DeleteDC()
@@ -223,6 +229,8 @@ class Helper():
                         if cnf.get('checkAgain') is not None:
                             if cnf.get('checkAgain') == 0:
                                 self.notChecks[handle_index].append(cnf.get('checkImg'))
+                        
+                        break
 
                     else:
                         self.recursion(cnf['found'],handle_index)
@@ -241,10 +249,14 @@ class Helper():
             print('暂停运行，按 F12 继续运行')
         else:
             print('开始运行，按 F12 暂停运行')
+    
+    def exit(self,key):
+        self.__del__()
+        exit()
 
     def run(self):
 
-        notFinishHandle = self.handles
+        notFinishHandle = list(self.handles)
         # finishHandle = []
         while True:
             while not self.wait:
@@ -264,9 +276,12 @@ class Helper():
                                 self.times[index] = datetime.now()
                                 self.notChecks[index] = []
                                 # 更新进度条
-                                self.pbars[index].update()
+                                self.pbars[index].update()   
                                 # self.play_nums[index] += 1
                                 # self.progress_manager.update(str(index), int((self.play_nums[index] / self.num_runs) * 100))
+                                # 标题栏显示进度
+                                title = win32gui.GetWindowText(self.handles[index])
+                                win32gui.SetWindowText(self.handles[index],title[:self.title_name_len] + '  进度：' +str(self.pbars[index].n) +'/'+ str(self.pbars[index].total))
                                 # 完成任务，删除待完成状态
                                 if self.pbars[index].n >= self.pbars[index].total:
                                     # finishHandle.append(handle)
@@ -297,4 +312,5 @@ if __name__ == '__main__':
             device_width=device_width,device_height=device_height)
         helper.run()
         helper.__del__()
+        del helper
     
