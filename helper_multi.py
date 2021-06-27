@@ -23,7 +23,7 @@ class Helper():
         self.play_nums = {}
         self.times = {}
         self.now_imgs = {}
-        self.notCheck = []
+        self.notChecks = {}
         self.failNum = 0
         self.wait = False # 暂停
         self.handles = []
@@ -123,6 +123,7 @@ class Helper():
             self.play_nums[index] = 0
             self.times[index] = datetime.now()
             self.now_imgs[index] = ""
+            self.notChecks[index] = []
             # self.progress_manager.update(str(index),0)
 
 
@@ -147,7 +148,6 @@ class Helper():
         win32api.SendMessage(self.handles[handle_index], win32con.WM_LBUTTONDOWN, 0, long_position)  # 模拟鼠标按下
         time.sleep(0.01 + random.random() * 0.02)
         win32api.SendMessage(self.handles[handle_index], win32con.WM_LBUTTONUP, 0, long_position)  # 模拟鼠标弹起
-
 
 
     def screenshot(self, handle_index):
@@ -190,7 +190,7 @@ class Helper():
     def recursion(self,images,handle_index):
 
         for img,cnf in images.items():
-            if img in self.notCheck:
+            if img in self.notChecks[handle_index]:
                 continue
 
             similarity = cnf.get('similarity') if cnf.get('similarity') is not None else 0.9
@@ -215,7 +215,7 @@ class Helper():
                         # 单次流程不再检查
                         if cnf.get('checkAgain') is not None:
                             if cnf.get('checkAgain') == 0:
-                                self.notCheck.append(cnf.get('checkImg'))
+                                self.notChecks[handle_index].append(cnf.get('checkImg'))
 
                     else:
                         self.recursion(cnf['found'],handle_index)
@@ -255,7 +255,7 @@ class Helper():
                             # 判断当前时间与上次一次完整流程的时间差  
                             if (datetime.now() - self.times[index]).seconds >= self.timeCost:
                                 self.times[index] = datetime.now()
-                                self.notCheck = []
+                                self.notChecks[index] = []
                                 # 更新进度条
                                 self.pbars[index].update()
                                 # self.play_nums[index] += 1
@@ -270,7 +270,7 @@ class Helper():
                                 time.sleep(0.5 + random.random() * 0.02)
                         elif self.now_imgs[index] == self.failFlag:
                             self.failNum += 1
-                            self.notCheck = []
+                            self.notChecks[index] = []
                             print('已失败 %d 次！！！' % self.failNum)
                             time.sleep(2 + random.random() * 0.02)
                 else:
