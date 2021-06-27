@@ -7,6 +7,7 @@ from cv2 import data
 import win32gui,win32ui,win32api,win32con
 from tqdm import tqdm
 from datetime import datetime
+# from eprogress import LineProgress, MultiProgressManager
 
 
 class Helper():
@@ -15,9 +16,11 @@ class Helper():
                 device_width = 2560,device_height= 1440):
 
         self.title_name = title_name
+        self.num_runs = num_runs
         self.device_width = device_width
         self.device_height = device_height
         self.pbars = []
+        self.play_nums = {}
         self.times = {}
         self.now_imgs = {}
         self.notCheck = []
@@ -100,9 +103,9 @@ class Helper():
 
 
         # Get the input for total running time
-        print("每个窗口运行次数(默认%d)：" % num_runs, end="")
+        print("每个窗口运行次数(默认%d)：" % self.num_runs, end="")
         num_runs_input = input()
-        num_runs = int(num_runs_input) if num_runs_input != "" else num_runs
+        self.num_runs = int(num_runs_input) if num_runs_input != "" else self.num_runs
 
         print()
         print('%s 开始运行 %s' % ('*'*20,'*'*20))
@@ -112,11 +115,15 @@ class Helper():
         print('按下 F12 暂停/运行脚本')
         print()
 
+        # self.progress_manager = MultiProgressManager()
         # Initialize progressing bar with the total running times
         for index,handle in enumerate(self.handles):
-            self.pbars.append(tqdm(total=num_runs, ascii=True, desc=self.title_name + "-%d" % (index+1)))
+            # self.progress_manager.put(str(index), LineProgress(total=self.num_runs, title=self.title_name + "-%d" % (index+1), width=50))
+            self.pbars.append(tqdm(total=num_runs, ascii=True, desc=self.title_name + "-%d" % (index+1),position=0))
+            self.play_nums[index] = 0
             self.times[index] = datetime.now()
             self.now_imgs[index] = ""
+            # self.progress_manager.update(str(index),0)
 
 
         keyboard.on_press_key("F12", self.pause)
@@ -249,11 +256,16 @@ class Helper():
                             if (datetime.now() - self.times[index]).seconds >= self.timeCost:
                                 self.times[index] = datetime.now()
                                 self.notCheck = []
+                                # 更新进度条
                                 self.pbars[index].update()
-                                print('%d , %d' % (index,self.pbars[index].n))
+                                # self.play_nums[index] += 1
+                                # self.progress_manager.update(str(index), int((self.play_nums[index] / self.num_runs) * 100))
+                                # 完成任务，删除待完成状态
                                 if self.pbars[index].n >= self.pbars[index].total:
                                     # finishHandle.append(handle)
                                     del notFinishHandle[index]
+                                # if self.play_nums[index] >= self.num_runs:
+                                #     del notFinishHandle[index]
 
                                 time.sleep(0.5 + random.random() * 0.02)
                         elif self.now_imgs[index] == self.failFlag:
