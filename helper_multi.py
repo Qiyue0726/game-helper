@@ -79,7 +79,8 @@ class Helper():
         if len(self.handles) > 1:
             print('请选择需要设置为队长/开车的窗口索引（左上角标题序号）')
             print('默认选择 [1]，请输入：', end="")
-            self.main_handle_index = input()
+            main_handle_index_input = input()
+            self.main_handle_index = int(main_handle_index_input) - 1 if main_handle_index_input != "" else 0
 
 
         # 选择配置文件并解析
@@ -190,8 +191,13 @@ class Helper():
     def recursion(self,images,handle_index):
 
         for img,cnf in images.items():
+
             if img in self.notChecks[handle_index]:
                 continue
+
+            if cnf.get('exclusive') if cnf.get('exclusive') is not None else False:
+                if handle_index != self.main_handle_index:
+                    continue
 
             similarity = cnf.get('similarity') if cnf.get('similarity') is not None else 0.9
             # 查找图片
@@ -213,6 +219,7 @@ class Helper():
                             time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
 
                         # 单次流程不再检查
+                        # if not cnf.get('checkAgain') if cnf.get('checkAgain') is not None else True:
                         if cnf.get('checkAgain') is not None:
                             if cnf.get('checkAgain') == 0:
                                 self.notChecks[handle_index].append(cnf.get('checkImg'))
