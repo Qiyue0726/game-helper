@@ -94,16 +94,11 @@ class Helper():
             print()
             print('默认选择 [%d]，请输入：' % config_file_index,end="")
             config_file_input = input()
-            config_file = './configs/' + (files[2][int(config_file_input)] if config_file_input != "" else files[2][int(config_file_index)])
+            self.config_file = './configs/' + (files[2][int(config_file_input)] if config_file_input != "" else files[2][int(config_file_index)])
             # print(config_file)
+            self.loadConfig()
 
-            with open(config_file,'r') as f:
-                config = json.load(f)
-                self.path = config.pop('path')
-                self.endFlag = config.pop('endFlag')
-                self.timeCost = config.pop('timeCost') # 流程最少耗时，单位秒
-                self.failFlag = config.pop('failFlag')
-                self.images = config
+            
 
 
         # Get the input for total running time
@@ -114,10 +109,11 @@ class Helper():
         print()
         print('%s 开始运行 %s' % ('*'*20,'*'*20))
         print()
-        print('配置文件：%s' % config_file)
+        print('配置文件：%s' % self.config_file)
         print('队长/开车的窗口索引：%d' % int(self.main_handle_index + 1))
         print('每个窗口运行次数：%d' % self.num_runs)
         print()
+        print('按下 F10 重新加载配置文件')
         print('按下 F12 暂停/运行脚本')
         print('按下 ESC 结束脚本')
         print()
@@ -136,8 +132,21 @@ class Helper():
 
         keyboard.on_press_key("F12", self.pause)
         keyboard.on_press_key("ESC", self.exit)
+        keyboard.on_press_key("F10", self.refresh)
+    
+    def loadConfig(self):
+        with open(self.config_file,'r') as f:
+                config = json.load(f)
+                self.path = config.pop('path')
+                self.endFlag = config.pop('endFlag')
+                self.timeCost = config.pop('timeCost') # 流程最少耗时，单位秒
+                self.failFlag = config.pop('failFlag')
+                self.images = config
     
     def __del__(self):
+        self.freeRes()
+    
+    def freeRes(self):
         for index,handle in enumerate(self.handles):
             self.pbars[index].close()
             win32gui.SetWindowText(handle,self.title_name)
@@ -250,20 +259,26 @@ class Helper():
         else:
             print('开始运行，按 F12 暂停运行')
     
+    def refresh(self,key):
+        self.loadConfig()
+        print('重新加载配置文件成功')
+    
     def exit(self,key):
-        self.__del__()
+        self.freeRes()
         exit()
 
     def run(self):
 
-        notFinishHandle = list(self.handles)
-        # finishHandle = []
+        finishHandle = []
         while True:
             while not self.wait:
 
-                if len(notFinishHandle):
+                if len(finishHandle) < len(self.handles):
                 
-                    for index,handle in enumerate(notFinishHandle):
+                    for index,handle in enumerate(self.handles):
+                        # 已完成，跳过
+                        if handle in finishHandle:
+                            continue
 
                         self.screenshot(index)
 
@@ -284,10 +299,8 @@ class Helper():
                                 win32gui.SetWindowText(self.handles[index],title[:self.title_name_len] + '  进度：' +str(self.pbars[index].n) +'/'+ str(self.pbars[index].total))
                                 # 完成任务，删除待完成状态
                                 if self.pbars[index].n >= self.pbars[index].total:
-                                    # finishHandle.append(handle)
-                                    del notFinishHandle[index]
+                                    finishHandle.append(handle)
                                 # if self.play_nums[index] >= self.num_runs:
-                                #     del notFinishHandle[index]
 
                                 time.sleep(0.5 + random.random() * 0.02)
                         elif self.now_imgs[index] == self.failFlag:
@@ -311,6 +324,6 @@ if __name__ == '__main__':
         helper = Helper(title_name='阴阳师-网易游戏', config_file_index = config_file_index,
             device_width=device_width,device_height=device_height)
         helper.run()
-        helper.__del__()
+        helper.freeRes()
         del helper
     

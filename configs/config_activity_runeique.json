@@ -18,6 +18,11 @@
         "offsetY": null
     },
     "start": {
+        "similarity": 0.85,
+        "found": 1,
+        "delay": 0.3
+    },
+    "fight": {
         "similarity": 0.93,
         "found": 1,
         "delay": 1
@@ -33,7 +38,7 @@
         "delay": 0.1
     },
     "end": {
-        "similarity": 0.97,
+        "similarity": 0.95,
         "found": 1,
         "delay": 0.1,
         "offsetX": 150,
