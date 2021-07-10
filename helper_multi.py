@@ -1,12 +1,12 @@
-# -*- coding:utf-8 -*-
+#coding=utf-8
 from __future__ import print_function
 import ctypes, sys, time, os, random, json
 import keyboard
 import cv2
-from cv2 import data
 import win32gui,win32ui,win32api,win32con
 from tqdm import tqdm
 from datetime import datetime
+import numpy as np
 # from eprogress import LineProgress, MultiProgressManager
 
 
@@ -135,7 +135,7 @@ class Helper():
         keyboard.on_press_key("F10", self.refresh)
     
     def loadConfig(self):
-        with open(self.config_file,'r') as f:
+        with open(self.config_file,'r',encoding='utf8') as f:
                 config = json.load(f)
                 self.path = config.pop('path')
                 self.endFlag = config.pop('endFlag')
@@ -177,7 +177,8 @@ class Helper():
         
 
     def resize_img(self,img_path):
-        img1 = cv2.imread(img_path, 0)
+        # img1 = cv2.imread(img_path, 0)
+        img1 = cv2.imdecode(np.fromfile(img_path,dtype=np.uint8),0)
         img2 = cv2.imread('images/screen.bmp', 0)
         height, width = img1.shape[:2]
         ratio = self.device_width / img2.shape[1]
