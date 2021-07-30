@@ -41,6 +41,8 @@ class Helper():
                 handle = win32gui.FindWindowEx(None, None, None, self.title_name)
                 if handle == 0:
                     print('未找到应用（%s）请先启动应用程序' % self.title_name)
+                    print()
+                    self.resetTitle()
                 else:
                     self.handles.append(handle)
             else:
@@ -156,7 +158,18 @@ class Helper():
             self.mfcDCs[index].DeleteDC()
             win32gui.ReleaseDC(handle, self.handleDCs[index])
 
+    def resetTitle(self):
+        while True:
+            print("请输入当前客户端标题（回车则结束重置）：", end="")
+            title = input()
+            if title == '':
+                break
+            print("重置后标题为：%s" % self.title_name)
+            handle = win32gui.FindWindow(None,title)
+            win32gui.SetWindowText(handle,self.title_name)
+        
 
+    # 点击鼠标左键
     def click(self,x, y, handle_index):
         # print('click %d' % handle_index)
         long_position = win32api.MAKELONG(x,y)
@@ -165,6 +178,16 @@ class Helper():
         time.sleep(0.01 + random.random() * 0.02)
         win32api.SendMessage(self.handles[handle_index], win32con.WM_LBUTTONUP, 0, long_position)  # 模拟鼠标弹起
 
+    # 拖动鼠标
+    def drag(self,startX,startY,endX,endY,handle_index):
+        start_position = win32api.MAKELONG(startX,startY)
+        end_position = win32api.MAKELONG(endX,endY)
+
+        win32api.SendMessage(self.handles[handle_index], win32con.WM_LBUTTONDOWN, win32con.MK_LBUTTON, start_position)  # 模拟鼠标按下
+        time.sleep(0.01 + random.random() * 0.02)
+        win32api.SendMessage(self.handles[handle_index], win32con.WM_MOUSEMOVE, win32con.MK_LBUTTON, end_position)    # 模拟鼠标移动
+        time.sleep(0.5 + random.random() * 0.02)
+        win32api.SendMessage(self.handles[handle_index], win32con.WM_LBUTTONUP, 0, end_position)  # 模拟鼠标弹起
 
     def screenshot(self, handle_index):
         path = os.path.abspath('.') + '\images\\'
@@ -229,7 +252,9 @@ class Helper():
 
                         x = int(center[0]) + random.randrange(int(50 * (self.widths[handle_index] / self.device_width))) + offsetX
                         y = int(center[1]) + random.randrange(int(25 * (self.heights[handle_index] / self.device_height))) + offsetY
+                        # print(center[0],x,'    ' ,center[1],y)
                         for i in range(cnf.get('found')):
+                            time.sleep(cnf.get('delay_pre') if cnf.get('delay_pre') is not None else 0)
                             self.click(x,y,handle_index)
                             # print(img,x,y)
                             time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
@@ -241,6 +266,9 @@ class Helper():
                                 self.notChecks[handle_index].append(cnf.get('checkImg'))
                         
                         break
+                    elif cnf.get('found') == 'print':
+                        print(cnf.get('msg'))
+
 
                     else:
                         self.recursion(cnf['found'],handle_index)
@@ -249,6 +277,10 @@ class Helper():
                 if cnf.get('notFound') is not None:
                     if cnf.get('notFound') == 'pass':
                         pass
+                    elif cnf.get('notFound') == 'pause':
+                        self.pause(None)
+                    elif cnf.get('notFound') == 'exit':
+                        self.exit(None)
                     else:
                         self.recursion(cnf['notFound'],handle_index)
 
