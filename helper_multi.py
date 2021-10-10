@@ -1,12 +1,14 @@
 #coding=utf-8
 from __future__ import print_function
 import ctypes, sys, time, os, random, json
+from threading import Event
 import keyboard
 import cv2
 import win32gui,win32ui,win32api,win32con
 from tqdm import tqdm
 from datetime import datetime
 import numpy as np
+import re
 # from eprogress import LineProgress, MultiProgressManager
 
 
@@ -159,13 +161,23 @@ class Helper():
             win32gui.ReleaseDC(handle, self.handleDCs[index])
 
     def resetTitle(self):
+        print("输入完整标题名进行精确查找，若找不到可尝试在末尾加 ** 进行模糊查找")
         while True:
             print("请输入当前客户端标题（回车则结束重置）：", end="")
             title = input()
+            handle = None
             if title == '':
                 break
+            if title[-2:] == '**':
+                hWndList = []
+                win32gui.EnumWindows(lambda hWnd, param: param.append(hWnd), hWndList)
+                for h in hWndList:
+                        if re.search(title[:-2], win32gui.GetWindowText(h)):
+                            handle = h
+            else:
+                handle = win32gui.FindWindow(None,title)
             print("重置后标题为：%s" % self.title_name)
-            handle = win32gui.FindWindow(None,title)
+            # handle = win32gui.FindWindow(None,title)
             win32gui.SetWindowText(handle,self.title_name)
         
 
@@ -208,7 +220,9 @@ class Helper():
         size = (int(width/ratio), int(height/ratio))
         return cv2.resize(img1, size, interpolation = cv2.INTER_AREA)
 
-    def Image_to_position(self,image, m = 0, similarity = 0.9):
+    # type = 1 返回第一个找到的坐标
+    # type = 2 返回找到的目标数
+    def Image_to_position(self,image, m = 0, similarity = 0.9,type = 1):
         image_path = 'images/' + self.path + str(image) + '.bmp'
         screen = cv2.imread('images/screen.bmp', 0)
         # template = cv2.imread(image_path, 0)
@@ -216,16 +230,31 @@ class Helper():
         methods = [cv2.TM_CCOEFF_NORMED, cv2.TM_SQDIFF_NORMED, cv2.TM_CCORR_NORMED]
         image_x, image_y = template.shape[:2]
         result = cv2.matchTemplate(screen, template, methods[m])
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-        # print(max_val)
-        if max_val >= similarity:
-            global center
-            # center = (max_loc[0] + image_y / 2, max_loc[1] + image_x / 2)
-            center = (max_loc[0], max_loc[1])
-            # print(center)
-            return center
-        else:
-            return False
+        
+        if type == 1:
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            # print(max_val)
+            if max_val >= similarity:
+                global center
+                # center = (max_loc[0] + image_y / 2, max_loc[1] + image_x / 2)
+                center = (max_loc[0], max_loc[1])
+                # print(center)
+                return center
+            else:
+                return False
+        elif type == 2:
+            # 返回res中值大于similarity的所有坐标
+            # 返回坐标格式(col,row) 注意：是先col后row 一般是(row,col)!!!
+            loc = np.where(result >= similarity)
+            
+            # for pt in zip(*loc[::-1]):
+            #     print(pt)
+            global foundCount 
+            foundCount = len(loc[0])/4
+            if foundCount > 0:
+                return foundCount
+            else:
+                return False
     
     def recursion(self,images,handle_index):
 
@@ -239,39 +268,56 @@ class Helper():
                     continue
 
             similarity = cnf.get('similarity') if cnf.get('similarity') is not None else 0.9
+            foundType = cnf.get('foundType') if cnf.get('foundType') is not None else 1
             # 查找图片
-            if self.Image_to_position(img, m = 0,similarity=similarity) != False:
-                # 找到图片看是否点击或继续递归查找
-                if cnf.get('found') is not None:
-                    # 立即点击
-                    if type(cnf.get('found')) == int:
-                        self.now_imgs[handle_index] = img
-                        time.sleep(0.2)
-                        offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0) * (self.widths[handle_index] / self.device_width))
-                        offsetY = int((cnf.get('offsetY') if cnf.get('offsetY') is not None else 0) * (self.heights[handle_index] / self.device_height))
+            if self.Image_to_position(img, m = 0,similarity=similarity,type=foundType) != False:
+                # print("窗口-%d 找到图片：%s" % (handle_index+1,img))
 
-                        x = int(center[0]) + random.randrange(int(50 * (self.widths[handle_index] / self.device_width))) + offsetX
-                        y = int(center[1]) + random.randrange(int(25 * (self.heights[handle_index] / self.device_height))) + offsetY
-                        # print(center[0],x,'    ' ,center[1],y)
-                        for i in range(cnf.get('found')):
-                            time.sleep(cnf.get('delay_pre') if cnf.get('delay_pre') is not None else 0)
-                            self.click(x,y,handle_index)
-                            # print(img,x,y)
+                if foundType == 1:
+                    # 找到图片看是否点击或继续递归查找
+                    if cnf.get('found') is not None:
+                        # 立即点击
+                        if type(cnf.get('found')) == int:
+                            self.now_imgs[handle_index] = img
+                            time.sleep(0.2)
+                            offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0) * (self.widths[handle_index] / self.device_width))
+                            offsetY = int((cnf.get('offsetY') if cnf.get('offsetY') is not None else 0) * (self.heights[handle_index] / self.device_height))
+
+                            x = int(center[0]) + random.randrange(int(50 * (self.widths[handle_index] / self.device_width))) + offsetX
+                            y = int(center[1]) + random.randrange(int(25 * (self.heights[handle_index] / self.device_height))) + offsetY
+                            # print(center[0],x,'    ' ,center[1],y)
+                            for i in range(cnf.get('found')):
+                                time.sleep(cnf.get('delay_pre') if cnf.get('delay_pre') is not None else 0)
+                                self.click(x,y,handle_index)
+                                # print(img,x,y)
+                                time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
+
+                            # 单次流程不再检查
+                            # if not cnf.get('checkAgain') if cnf.get('checkAgain') is not None else True:
+                            if cnf.get('checkAgain') is not None:
+                                if cnf.get('checkAgain') == 0:
+                                    self.notChecks[handle_index].append(cnf.get('checkImg'))
+                            
+                            break
+                        elif cnf.get('found') == 'print':
+                            print(cnf.get('msg'))
+                        elif cnf.get('found') == 'printXY':
+                            print('\nX = %d,Y = %d' % (center[0],center[1]))
+
+
+                        else:
                             time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
+                            self.screenshot(handle_index)
+                            self.recursion(cnf['found'],handle_index)
+                elif foundType == 2:
+                    if foundCount >= cnf.get('foundCount') if cnf.get('foundCount') is not None else 2:
+                        eventList = list(cnf.get('event').split(','))
+                        for event in eventList:
+                            if event == 'pause':
+                                self.pause(None)
+                            if event == 'print':
+                                print(cnf.get('msg'))
 
-                        # 单次流程不再检查
-                        # if not cnf.get('checkAgain') if cnf.get('checkAgain') is not None else True:
-                        if cnf.get('checkAgain') is not None:
-                            if cnf.get('checkAgain') == 0:
-                                self.notChecks[handle_index].append(cnf.get('checkImg'))
-                        
-                        break
-                    elif cnf.get('found') == 'print':
-                        print(cnf.get('msg'))
-
-
-                    else:
-                        self.recursion(cnf['found'],handle_index)
             else:
                 # 找不到图片看是否有操作或继续递归查找
                 if cnf.get('notFound') is not None:
@@ -282,6 +328,8 @@ class Helper():
                     elif cnf.get('notFound') == 'exit':
                         self.exit(None)
                     else:
+                        time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
+                        self.screenshot(handle_index)
                         self.recursion(cnf['notFound'],handle_index)
 
     def pause(self,key):
