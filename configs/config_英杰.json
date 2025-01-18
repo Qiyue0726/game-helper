@@ -1,0 +1,21 @@
+{
+    "path": "emulator/yingjie/",
+    "timeCost": 15,
+    "endFlag": "end",
+    "failFlag": "fail",
+    "start": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 1
+    },
+    "win": {
+        "similarity": 0.95,
+        "found": 2,
+        "delay": 0.2
+    },
+    "end": {
+        "similarity": 0.93,
+        "found": 2,
+        "delay": 0.3
+    }
+}

@@ -1,5 +1,6 @@
 # 前言
 该项目适用于大部分游戏的简单自动化，一定程度上可以达到养老护肝的效果。  
+目前仅支持安卓模拟器（个人使用MuMu），桌面版由于 Windows 的版本更新，导致有很多问题，故而放弃。
 项目内的截图和配置都适用于阴阳师，可以根据需要进行截图和相应的配置已适用于其它游戏。  
 
 ## 特别感谢
@@ -11,13 +12,13 @@ jajajag 的 [YYS-Helper](https://github.com/jajajag/YYS-Helper) 的项目架构�
 ## **警告：** 不保证一定不会被系统检测到，造成的一切后果请自行承担。  
 
 # 使用方式
-由于我使用的显示器是 2k(2560\*1440) 的，所以如果你使用的是 1080P(1920\*1080) 或其它分辨率的显示器，请修改 `helper.py` 中的 `device_width` 和 `device_height`。   
-
-如果分辨率不同，除了修改文件外，还需要将游戏全屏，然后截图替换文件夹中的图片，一定要保存为 bmp 格式。 
+我的显示器是 4k(3840\*2160)，屏幕缩放设置为 150%，模拟器设置的是 2k*(2560\*1440)。
+如果你的分辨率不同，可能需要重新截图，然后将截图替换文件夹中的图片，一定要保存为 png 格式。 
+可以使用项目中的 adb.py 脚本来测试图片匹配的准确度。
 
 除此之外，还需要安装以下 python 库
 ```
-pip install opencv-python pywin32 tqdm keyboard
+pip install opencv-python pywin32 tqdm keyboard pure-python-adb
 ```
 
 ## 配置文件说明
@@ -30,7 +31,7 @@ pip install opencv-python pywin32 tqdm keyboard
 
 {
     "path":"2k/yuhun/",         // 必填，截图的路径，在 images 文件夹里
-    "timeCost": 5,              // 一个完整流程的最少耗时
+    "timeCost": 5,              // 一个完整流程的最少耗时,防止多次点击endFlag后计数不准
     "endFlag":"img",            // 必填，一个流程的最后一个识别图
     "failFlag": "fail",         // 必填，一个流程失败的识别图
     "imgName":{                 // 需要识别的图片，img 为截图的文件名
