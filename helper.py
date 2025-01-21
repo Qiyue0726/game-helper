@@ -3,11 +3,8 @@ from __future__ import print_function
 import ctypes, sys, time, os, random, json
 import keyboard
 import cv2
-from cv2 import data
-import win32gui,win32ui,win32api,win32con
 from tqdm import tqdm
 from datetime import datetime
-import adbutils
 import subprocess
 from ppadb.client import Client
 class Helper():
@@ -28,7 +25,7 @@ class Helper():
 
         self.load_config(config_file_index, num_runs)
 
-        print('按下 F10 切换配置文件')
+        print('按下 F10 停止运行脚本')
         print('按下 F12 暂停/运行脚本')
         print()
         keyboard.on_press_key("F10", self.switchConfig)
@@ -126,8 +123,11 @@ class Helper():
 
         methods = [cv2.TM_CCOEFF_NORMED, cv2.TM_SQDIFF_NORMED, cv2.TM_CCORR_NORMED]
         image_x, image_y = template.shape[:2]
-        if screen is None or template is None:
-            print('图片未找到')
+        if screen is None :
+            print('screen图片未找到')
+            return False
+        if template is None:
+            print('template图片未找到')
             return False
         result = cv2.matchTemplate(screen, template, methods[m])
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -206,12 +206,8 @@ class Helper():
             print('开始运行，按 F12 暂停运行')
     
     def switchConfig(self,key):
-        self.wait = not self.wait
-        self.pbar.close()
-        self.load_config(0, 100)
-        print('切换配置文件成功，继续运行')
-        self.wait = not self.wait
-        self.run()
+        print('停止运行当前脚本，回车继续以选择其他配置文件')
+        self.pbar.n = self.pbar.total
 
     def run(self):
         self.now_img = ''
