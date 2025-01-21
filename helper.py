@@ -214,6 +214,8 @@ class Helper():
         self.time = datetime.now()
         while True:
             while not self.wait:
+                if self.pbar.n >= self.pbar.total:
+                    return
                 
                 self.screenshot()
 
