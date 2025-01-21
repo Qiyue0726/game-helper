@@ -26,6 +26,40 @@ class Helper():
         self.device_width = int(parts[0])
         self.device_height = int(parts[1])
 
+        self.load_config(config_file_index, num_runs)
+
+        print('按下 F10 切换配置文件')
+        print('按下 F12 暂停/运行脚本')
+        print()
+        keyboard.on_press_key("F10", self.switchConfig)
+        keyboard.on_press_key("F12", self.pause)
+
+    def connect_to_device(self, host, port):
+        try:
+            # 创建 ADB 客户端
+            client = Client(host="127.0.0.1", port=5037)
+            # 获取设备列表
+            devices = client.devices()
+            if len(devices) == 0:
+                print("No devices found")
+                return
+            elif len(devices) == 1:
+                self.device = devices[0]
+            else:
+                print("设备序号：")
+                for i, device in enumerate(devices):
+                    print(f"[{i}]: {device.serial}")
+                print("请选择设备序号：", end="")
+                deviceId = input()
+                deviceId = int(deviceId) if deviceId != "" else 0
+                self.device = devices[deviceId]
+            
+            print(f"Connected to {self.device.serial}")
+            
+        except subprocess.CalledProcessError as e:
+            print(f"Failed to connect: {e}")
+
+    def load_config(self, config_file_index, num_runs):
         print("选择配置文件")
         for files in os.walk('./configs'):
             for index,file in enumerate(files[2]):
@@ -56,7 +90,6 @@ class Helper():
                     print(f"发生其他错误: {e}")
                     return
 
-
         # Get the input for total running time
         print("运行次数(默认%d)：" % num_runs, end="")
         num_runs_input = input()
@@ -67,52 +100,11 @@ class Helper():
         print()
         print('配置文件：%s' % config_file)
         print('运行次数：%d' % num_runs)
-        print('按下 F12 暂停/运行脚本')
-        print()
 
         # Initialize progressing bar with the total running times
         self.pbar = tqdm(total=num_runs, ascii=True)
-
-        keyboard.on_press_key("F12", self.pause)
-
-    def connect_to_device(self, host, port):
-        try:
-            # 创建 ADB 客户端
-            # adb = adbutils.AdbClient(host=host, port=port)
-            # devices = adb.device_list()
-
-            # for i, device in devices:
-            #     print(f"{i}: {device.serial}")
-
-            # print("选择设备序号：", end="")
-            # deviceId = input()
-            # deviceId = int(deviceId) if deviceId != "" else 0
-            # self.device = adb.device(serial=devices[deviceId].serial)
-            # print(f"Connected to {devices[deviceId].serial}")
-
-            # 创建 ADB 客户端
-            client = Client(host="127.0.0.1", port=5037)
-            # 获取设备列表
-            devices = client.devices()
-            if len(devices) == 0:
-                print("No devices found")
-                return
-            elif len(devices) == 1:
-                self.device = devices[0]
-            else:
-                print("设备序号：")
-                for i, device in enumerate(devices):
-                    print(f"[{i}]: {device.serial}")
-                print("请选择设备序号：", end="")
-                deviceId = input()
-                deviceId = int(deviceId) if deviceId != "" else 0
-                self.device = devices[deviceId]
-            
-            print(f"Connected to {self.device.serial}")
-            
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to connect: {e}")
-
+        self.pbar.n = 0
+    
     def __del__(self):
         self.pbar.close()
         subprocess.run(["adb/adb.exe", "kill-server"], check=True)
@@ -134,6 +126,9 @@ class Helper():
 
         methods = [cv2.TM_CCOEFF_NORMED, cv2.TM_SQDIFF_NORMED, cv2.TM_CCORR_NORMED]
         image_x, image_y = template.shape[:2]
+        if screen is None or template is None:
+            print('图片未找到')
+            return False
         result = cv2.matchTemplate(screen, template, methods[m])
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
@@ -209,9 +204,16 @@ class Helper():
             print('暂停运行，按 F12 继续运行')
         else:
             print('开始运行，按 F12 暂停运行')
+    
+    def switchConfig(self,key):
+        self.wait = not self.wait
+        self.pbar.close()
+        self.load_config(0, 100)
+        print('切换配置文件成功，继续运行')
+        self.wait = not self.wait
+        self.run()
 
     def run(self):
-
         self.now_img = ''
         self.time = datetime.now()
         while True:

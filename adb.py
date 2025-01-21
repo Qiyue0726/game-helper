@@ -85,7 +85,7 @@ class Helper():
         end = datetime.now()
         # 计算毫秒数
         print((end - start).microseconds/1000)
-        # self.Image_to_position('start', m = 0, similarity = 0.6)
+        self.Image_to_position('start', m = 0, similarity = 0.6)
         # self.click()
         # self.recursion(images)
         # self.run()

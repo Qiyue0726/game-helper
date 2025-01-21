@@ -1,0 +1,33 @@
+{
+    "path": "emulator/契灵",
+    "timeCost": 30,
+    "endFlag": "end",
+    "failFlag": "fail",
+    "start": {
+        "similarity": 0.9,
+        "found": 1,
+        "delay": 1
+    },
+    "ready": {
+        "similarity": 0.9,
+        "found": 1,
+        "delay": 1
+    },
+    "win": {
+        "similarity": 0.9,
+        "found": 3,
+        "delay": 0.2
+    },
+    "end": {
+        "similarity": 0.9,
+        "found": 2,
+        "delay": 0.2,
+        "offsetX": 150,
+        "offsetY": -50
+    },
+    "fail": {
+        "similarity": 0.9,
+        "found": 1,
+        "delay": 0.5
+    }
+}
