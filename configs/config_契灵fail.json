@@ -1,0 +1,16 @@
+{
+    "path": "emulator/yuhun/",
+    "timeCost": 30,
+    "endFlag": "end",
+    "failFlag": "fail",
+    "auto": {
+        "similarity": 0.95,
+        "found": 1,
+        "delay": 0.5
+    },
+    "fail": {
+        "similarity": 0.95,
+        "found": 1,
+        "delay": 0.5
+    }
+}
