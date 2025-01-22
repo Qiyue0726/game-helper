@@ -7,15 +7,22 @@ from tqdm import tqdm
 from datetime import datetime
 import subprocess
 from ppadb.client import Client
+import tkinter as tk
+from tkinter import messagebox
+
 class Helper():
 
     def __init__(self, num_runs=100, config_file_index = 0, host="127.0.0.1", port=5037):
         
         self.notCheck = []
-        self.failNum = 0
+        self.failCount = 0
         self.wait = False # 暂停
 
         self.connect_to_device(host, port)
+
+        self.root = tk.Tk()
+        self.root.withdraw()
+        self.root.attributes('-topmost', True)  # 将窗口设置为置顶
 
         # 通过adb获取设备分辨率
         device_info = self.device.shell("wm size")
@@ -75,6 +82,12 @@ class Helper():
                     self.endFlag = config.pop('endFlag')
                     self.timeCost = config.pop('timeCost') # 流程最少耗时，单位秒
                     self.failFlag = config.pop('failFlag')
+                    if config.get('stopFlag') is not None:
+                        self.stopFlag = config.pop('stopFlag')
+                    if config.get('failNum') is not None:
+                        self.failNum = config.pop('failNum')
+                    else:
+                        self.failNum = 10
                     self.images = config
                 
                 except json.JSONDecodeError as e:
@@ -104,6 +117,7 @@ class Helper():
     
     def __del__(self):
         self.pbar.close()
+        self.root.destroy()
         subprocess.run(["adb/adb.exe", "kill-server"], check=True)
 
     def click(self,x, y):
@@ -186,7 +200,9 @@ class Helper():
                         if cnf.get('checkAgain') is not None:
                             if cnf.get('checkAgain') == 0:
                                 self.notCheck.append(cnf.get('checkImg'))
-
+                    elif cnf.get('found') == 'pass':
+                        self.now_img = img
+                        return
                     else:
                         self.recursion(cnf['found'])
             else:
@@ -232,10 +248,28 @@ class Helper():
                             return
                         time.sleep(0.5 + random.random() * 0.02)
                 elif self.now_img == self.failFlag:
-                    self.failNum += 1
+                    self.failCount += 1
                     self.notCheck = []
-                    print('已失败 %d 次！！！' % self.failNum)
+                    print('已失败 %d 次！！！' % self.failCount)
                     time.sleep(2 + random.random() * 0.02)
+                    if self.failCount%self.failNum == 0:
+                        self.wait = not self.wait
+                        print('暂停运行，按 F12 继续运行')
+                        # messagebox.showwarning("警告", "失败 %d 次 ！！！\n暂停运行，按 F12 继续运行" % self.failCount)
+                        result = messagebox.askyesno(
+                                    "警告", f"失败 {self.failCount} 次 ！！！\n是否继续运行",
+                                    icon='warning',
+                                    type=messagebox.YESNO
+                                )
+                        if result:
+                            self.wait = not self.wait
+                            print('开始运行，按 F12 暂停运行')
+                        else:
+                            print('停止运行当前任务')
+                            return
+                elif self.now_img == self.stopFlag:
+                    print('停止运行当前任务')
+                    return
         
           
 

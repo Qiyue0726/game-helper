@@ -1,0 +1,56 @@
+{
+    "path": "emulator/tupo/",
+    "timeCost": 15,
+    "endFlag": "end",
+    "failFlag": "fail",
+    "stopFlag": "zero",
+    "failNum": 3,
+    "zero": {
+        "similarity": 0.93,
+        "found": "pass"
+    },
+    "start": {
+        "similarity": 0.93,
+        "found": 1,
+        "notFound": {
+            "xun": {
+                    "similarity": 0.95,
+                    "found": 1,
+                    "delay": 0.5,
+                    "offsetX": 15,
+                    "offsetY": 5,
+                    "notFound": {
+                        "kong": {
+                            "similarity": 0.93,
+                            "found": 1,
+                            "delay": 0.5,
+                            "offsetX": 15,
+                            "offsetY": 5
+                        }
+                    }
+                }
+        },
+        "delay": 1,
+        "offsetX": 10,
+        "offsetY": 5
+    },
+    "win": {
+        "similarity": 0.95,
+        "found": 2,
+        "delay": 0.2
+    },
+    "end": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 0.3,
+        "offsetX": 50,
+        "offsetY": 30
+    },
+    "fail": {
+        "similarity": 0.93,
+        "found": 1,
+        "delay": 0.5,
+        "offsetX": 50,
+        "offsetY": 50
+    }
+}

@@ -15,11 +15,12 @@ if __name__ == '__main__':
         helper = Helper(config_file_index = 0)
         helper.run()
         while flag:
-            con = input("是否继续运行？(Y/N):")
+            con = input("是否继续运行其它任务？(Y/N):")
             continueFlag = "Y"
             continueFlag = con if con != "" else continueFlag
             if continueFlag == 'y' or continueFlag == "Y":
                 helper.pbar.close()
+                helper.wait = False
                 helper.load_config(0, 100)
                 helper.run()
             else:
