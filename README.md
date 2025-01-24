@@ -34,8 +34,8 @@ pip install opencv-python tqdm keyboard pure-python-adb
     "timeCost": 5,              // 一个完整流程的最少耗时,防止多次点击endFlag后计数不准
     "endFlag":"img",            // 必填，一个流程的最后一个识别图
     "failFlag": "fail",         // 必填，一个流程失败的识别图
-    "stopFlag": "stop",         // 非必填，结束当前任务
-    "failNum": 3,               // 非必填，失败次数，每失败 failNum 次就弹窗警告，默认 10
+    "stopFlag": ["stopImg"],         // 非必填，结束当前任务，字符串数组类型
+    "failNum": 3,               // 非必填，失败次数，每失败若干次就弹窗警告，默认 10
     "imgName":{                 // 需要识别的图片，img 为截图的文件名
         "similarity":0.95,      // 图片相似度，默认 0.9
         "exclusive": true,      // 是否主窗口专属，false 不进行检测

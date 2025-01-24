@@ -83,7 +83,10 @@ class Helper():
                     self.timeCost = config.pop('timeCost') # 流程最少耗时，单位秒
                     self.failFlag = config.pop('failFlag')
                     if config.get('stopFlag') is not None:
-                        self.stopFlag = config.pop('stopFlag')
+                        self.stopFlags = config.pop('stopFlag')
+                    else:
+                        self.stopFlags = None
+                        
                     if config.get('failNum') is not None:
                         self.failNum = config.pop('failNum')
                     else:
@@ -121,7 +124,7 @@ class Helper():
         subprocess.run(["adb/adb.exe", "kill-server"], check=True)
 
     def click(self,x, y):
-        print(f"Clicking at ({x}, {y})")
+        # print(f"Clicking at ({x}, {y})")
         self.device.shell(f"input tap {x} {y}")
 
     def screenshot(self):
@@ -160,11 +163,11 @@ class Helper():
         # cv2.destroyAllWindows()
 
         if max_val >= similarity:
-            global center
+            global coord
             # center = (max_loc[0] + image_y / 2, max_loc[1] + image_x / 2)
-            center = (max_loc[0], max_loc[1])
-            print(f'image:{image}, similarity:{max_val}, center:{center}')
-            return center
+            coord = (max_loc[0], max_loc[1])
+            # print(f'image:{image}, similarity:{max_val}, coordinate:{coord}')
+            return coord
         else:
             return False
     
@@ -187,13 +190,11 @@ class Helper():
                         offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0))
                         offsetY = int((cnf.get('offsetY') if cnf.get('offsetY') is not None else 0))
 
-                        x = int(center[0]) + random.randrange(int(50)) + offsetX
-                        y = int(center[1]) + random.randrange(int(25)) + offsetY
-                        # x = int(center[0]) 
-                        # y = int(center[1]) 
+                        x = int(coord[0]) + random.randrange(int(50)) + offsetX
+                        y = int(coord[1]) + random.randrange(int(25)) + offsetY
+
                         for i in range(cnf.get('found')):
                             self.click(x,y)
-                            # print(img,x,y)
                             time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
 
                         # 单次流程不再检查
@@ -214,7 +215,6 @@ class Helper():
                         self.recursion(cnf['notFound'])
 
     def pause(self,key):
-        # print(key)
         self.wait = not self.wait
         if self.wait == True:
             print('暂停运行，按 F12 继续运行')
@@ -229,9 +229,10 @@ class Helper():
         self.now_img = ''
         self.time = datetime.now()
         while True:
+            if self.pbar.n >= self.pbar.total:
+                return
+            
             while not self.wait:
-                if self.pbar.n >= self.pbar.total:
-                    return
                 
                 self.screenshot()
 
@@ -253,7 +254,7 @@ class Helper():
                     print('已失败 %d 次！！！' % self.failCount)
                     time.sleep(2 + random.random() * 0.02)
                     if self.failCount%self.failNum == 0:
-                        self.wait = not self.wait
+                        self.wait = True
                         print('暂停运行，按 F12 继续运行')
                         # messagebox.showwarning("警告", "失败 %d 次 ！！！\n暂停运行，按 F12 继续运行" % self.failCount)
                         result = messagebox.askyesno(
@@ -262,14 +263,16 @@ class Helper():
                                     type=messagebox.YESNO
                                 )
                         if result:
-                            self.wait = not self.wait
+                            self.wait = False
                             print('开始运行，按 F12 暂停运行')
                         else:
                             print('停止运行当前任务')
                             return
-                elif self.now_img == self.stopFlag:
-                    print('停止运行当前任务')
-                    return
+                if self.stopFlags is not None:
+                    for stopImg in self.stopFlags:
+                        if self.now_img == stopImg:
+                            print('停止运行当前任务')
+                            return
         
           
 

@@ -3,36 +3,72 @@
     "timeCost": 15,
     "endFlag": "end",
     "failFlag": "fail",
-    "stopFlag": "zero",
+    "stopFlag": ["zero"],
     "failNum": 3,
     "zero": {
-        "similarity": 0.93,
+        "similarity": 0.97,
         "found": "pass"
     },
     "start": {
         "similarity": 0.93,
         "found": 1,
+        "delay": 1,
+        "offsetX": 10,
+        "offsetY": 5,
         "notFound": {
-            "xun": {
+            "fiveStar": {
                     "similarity": 0.95,
                     "found": 1,
                     "delay": 0.5,
                     "offsetX": 15,
                     "offsetY": 5,
                     "notFound": {
-                        "kong": {
-                            "similarity": 0.93,
+                        "fourStar": {
+                            "similarity": 0.95,
                             "found": 1,
                             "delay": 0.5,
                             "offsetX": 15,
-                            "offsetY": 5
+                            "offsetY": 5,
+                            "notFound": {
+                            "threeStar": {
+                                "similarity": 0.95,
+                                "found": 1,
+                                "delay": 0.5,
+                                "offsetX": 15,
+                                "offsetY": 5,
+                                "notFound": {
+                                    "twoStar": {
+                                        "similarity": 0.95,
+                                        "found": 1,
+                                        "delay": 0.5,
+                                        "offsetX": 15,
+                                        "offsetY": 5,
+                                        "notFound": {
+                                            "oneStar": {
+                                                "similarity": 0.95,
+                                                "found": 1,
+                                                "delay": 0.5,
+                                                "offsetX": 15,
+                                                "offsetY": 5,
+                                                "notFound": {
+                                                    "kong": {
+                                                        "similarity": 0.95,
+                                                        "found": 1,
+                                                        "delay": 0.5,
+                                                        "offsetX": 15,
+                                                        "offsetY": 5
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
-        },
-        "delay": 1,
-        "offsetX": 10,
-        "offsetY": 5
+            }
+        }
     },
     "win": {
         "similarity": 0.95,
