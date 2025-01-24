@@ -3,6 +3,11 @@
     "timeCost": 5,
     "endFlag": "end",
     "failFlag": "fail",
+    "stopFlag": "stop",
+    "stop": {
+        "similarity": 0.93,
+        "found": "pass"
+    },
     "xiezuo": {
         "similarity": 0.93,
         "found": {
