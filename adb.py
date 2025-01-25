@@ -5,6 +5,8 @@ from cv2 import data
 from ppadb.client import Client
 import adbutils
 from datetime import datetime
+import tkinter as tk
+from tkinter import messagebox
 class Helper():
     def connect_to_device(self):
         try:
@@ -93,6 +95,24 @@ class Helper():
 if __name__ == "__main__":
     helper = Helper()
     helper.run()
+    # 创建主窗口
+    # root = tk.Tk()
+    # root.withdraw()  # 隐藏主窗口，只显示弹窗
+    # root.attributes("-topmost", True)  # 置顶
+
+    # # 显示警告弹窗
+    # messagebox.showwarning("警告", "这是一个警告信息！")
+    # result = messagebox.askyesno(
+    #                                 "警告", f"失败次 ！！！\n暂停运行，按 F12 继续运行",
+    #                                 icon='warning',
+    #                                 type=messagebox.YESNO
+    #                             )
+    # if result:
+    #     pass
+    # else:
+    #     pass
+    # # 关闭主窗口
+    # root.destroy()
     # helper.connect_to_device()
     # # 通过adb获取设备分辨率
     # device_info = subprocess.run(["adb", "shell", "wm", "size"], capture_output=True, text=True, check=True)

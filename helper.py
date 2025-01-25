@@ -9,6 +9,7 @@ import subprocess
 from ppadb.client import Client
 import tkinter as tk
 from tkinter import messagebox
+from collections import deque
 
 class Helper():
 
@@ -29,6 +30,8 @@ class Helper():
         parts = device_info.strip().split(': ')[1].split('x')
         self.device_width = int(parts[0])
         self.device_height = int(parts[1])
+
+        self.queue = deque(maxlen=10)  # 保存最近10次的结果
 
         self.load_config(config_file_index, num_runs)
 
@@ -67,7 +70,11 @@ class Helper():
         print("选择配置文件")
         for files in os.walk('./configs'):
             for index,file in enumerate(files[2]):
-                print('[%d] %s' % (index,os.path.splitext(file)[0][7:]))
+                configName = os.path.splitext(file)[0][7:]
+                # 如果以数字开头，去掉数字
+                while configName[0].isdigit():
+                    configName = configName[1:]
+                print('[%d] %s' % (index, configName))
             print()
             print('默认选择 [%d]，请输入：' % config_file_index,end="")
             config_file_input = input()
@@ -91,7 +98,13 @@ class Helper():
                         self.failNum = config.pop('failNum')
                     else:
                         self.failNum = 10
-                    self.images = config
+
+                    if config.get('refreshConfig') is not None:
+                        self.refreshConfig = config.pop("refreshConfig")
+                        self.refreshNum = config.pop("refreshNum")
+
+                    self.progressConfig = config.pop("progressConfig")
+                    
                 
                 except json.JSONDecodeError as e:
                     print(f"JSON 解析错误: {e}")
@@ -186,7 +199,7 @@ class Helper():
                     # 立即点击
                     if type(cnf.get('found')) == int:
                         self.now_img = img
-                        time.sleep(0.2)
+                        # time.sleep(0.2)
                         offsetX = int((cnf.get('offsetX') if cnf.get('offsetX') is not None else 0))
                         offsetY = int((cnf.get('offsetY') if cnf.get('offsetY') is not None else 0))
 
@@ -195,6 +208,7 @@ class Helper():
 
                         for i in range(cnf.get('found')):
                             self.click(x,y)
+                            self.queue.append(self.now_img)
                             time.sleep(cnf.get('delay') if cnf.get('delay') is not None else 0)
 
                         # 单次流程不再检查
@@ -222,21 +236,29 @@ class Helper():
             print('开始运行，按 F12 暂停运行')
     
     def switchConfig(self,key):
-        print('停止运行当前脚本，回车继续以选择其他配置文件')
+        self.wait = False      # 反正按了 F12 又按 F10
+        print('停止运行当前脚本，可以继续选择其他配置文件')
         self.pbar.n = self.pbar.total
 
     def run(self):
         self.now_img = ''
         self.time = datetime.now()
         while True:
-            if self.pbar.n >= self.pbar.total:
-                return
-            
             while not self.wait:
+                
+                if self.pbar.n >= self.pbar.total:
+                    return
                 
                 self.screenshot()
 
-                self.recursion(self.images)
+                self.recursion(self.progressConfig)
+
+                # 如果连续10次都是同一个图片，需要执行卡住后的流程
+                if len(self.queue) == 10 and len(set(self.queue)) == 1:
+                    print('连续10次都是同一个图片，开始执行卡住后的流程')
+                    for i in range(self.refreshNum):
+                        self.screenshot()
+                        self.recursion(self.refreshConfig)
                     
                 # 一个完整流程结束，可能多次点击 
                 if self.now_img == self.endFlag:

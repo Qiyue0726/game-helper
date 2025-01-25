@@ -14,13 +14,17 @@ def connect_device_with_port_attempts(ip, base_port):
             command = f"{adb_relative_path} connect {ip}:{current_port}"
             print(command)
             # 执行 ADB 命令
-            result = subprocess.run(command, shell=True, check=True, text=True, capture_output=True, encoding='utf-8')
-            # 检查命令输出是否包含成功连接的信息
-            if "connected to" in result.stdout:
-                print(f"成功连接到设备 {ip}:{current_port}")
-                return True
+            result = subprocess.run(command, shell=True, text=True, capture_output=True, encoding='utf-8')
+            # 手动检查返回码
+            if result.returncode == 0:
+                # 检查命令输出是否包含成功连接的信息
+                if "connected to" in result.stdout:
+                    print(f"成功连接到设备 {ip}:{current_port}")
+                    return True
+                else:
+                    print(f"尝试连接 {ip}:{current_port} 失败: {result.stderr}")
             else:
-                print(f"尝试连接 {ip}:{current_port} 失败: {result.stderr}")
+                print(f"尝试连接 {ip}:{current_port} 时发生错误: {result.stderr}")
         except subprocess.CalledProcessError as e:
             print(f"尝试连接 {ip}:{current_port} 时发生错误: {e.stderr}")
     # 如果超过最大尝试次数仍未成功连接，则抛出错误
@@ -30,7 +34,7 @@ def connect_device_with_port_attempts(ip, base_port):
 if __name__ == '__main__': 
         # subprocess.run(["adb/adb.exe", "connect", "127.0.0.1:16384"], check=True)
         device_ip = "127.0.0.1"
-        start_port = 16385
+        start_port = 16384
         try:
             connect_device_with_port_attempts(device_ip, start_port)
 

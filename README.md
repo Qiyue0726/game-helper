@@ -34,18 +34,23 @@ pip install opencv-python tqdm keyboard pure-python-adb
     "timeCost": 5,              // 一个完整流程的最少耗时,防止多次点击endFlag后计数不准
     "endFlag":"img",            // 必填，一个流程的最后一个识别图
     "failFlag": "fail",         // 必填，一个流程失败的识别图
-    "stopFlag": ["stopImg"],         // 非必填，结束当前任务，字符串数组类型
+    "stopFlag": ["stopImg"],    // 非必填，结束当前任务，字符串数组类型
     "failNum": 3,               // 非必填，失败次数，每失败若干次就弹窗警告，默认 10
-    "imgName":{                 // 需要识别的图片，img 为截图的文件名
-        "similarity":0.95,      // 图片相似度，默认 0.9
-        "exclusive": true,      // 是否主窗口专属，false 不进行检测
-        "found":2,              // 如果找到图片进行的操作，可进行嵌套；'pass' 表示不处理
-        "notFound":null,        // 找不到图片进行的操作，可进行嵌套
-        "offsetX":30,           // 点击的坐标和识别图左上角横坐标的偏移量，默认 0
-        "offsetY":-30,          // 点击的坐标和识别图左上角纵坐标的偏移量，默认 0
-        "delay":0.1,            // 每点击一次后睡眠时间，默认 0，双击以上建议配置
-        "checkAgain": false,    // 是否重复检测
-        "checkImg": "fighting"  // 不重复检测的图片
+    "refreshNum": 3,            // 必填（refreshConfig 存在时），刷新次数，用于配置主流程卡住时，执行副流程次数
+    "refreshConfig": {}         // 非必填，副流程配置，与下面主流程配置方式相同
+    "progressConfig: {          // 主流程配置
+        "imgName":{                     // 需要识别的图片，img 为截图的文件名
+                "similarity":0.95,      // 图片相似度，默认 0.9
+                "exclusive": true,      // 是否主窗口专属，false 不进行检测
+                "found":2,              // 如果找到图片进行的操作，可进行嵌套；'pass' 表示不处理
+                "notFound":null,        // 找不到图片进行的操作，可进行嵌套
+                "offsetX":30,           // 点击的坐标和识别图左上角横坐标的偏移量，默认 0
+                "offsetY":-30,          // 点击的坐标和识别图左上角纵坐标的偏移量，默认 0
+                "delay":0.1,            // 每点击一次后睡眠时间，默认 0，双击以上建议配置
+                "checkAgain": false,    // 是否重复检测
+                "checkImg": "fighting"  // 不重复检测的图片
+            }
     }
+    
 }
 ```

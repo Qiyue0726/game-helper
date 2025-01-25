@@ -1,0 +1,109 @@
+{
+    "path": "emulator/tansuo/",
+    "timeCost": 15,
+    "endFlag": "boss",
+    "failFlag": "fail",
+    "refreshNum": 3,
+    "refreshConfig": {
+        "back": {
+            "similarity": 0.95,
+            "found": 1,
+            "delay": 0.5
+        },
+        "yes": {
+            "similarity": 0.95,
+            "found": 1,
+            "delay": 0.5
+        }
+    },
+    "progressConfig": {
+        "confirm": {
+            "desc": "确认是否是二十八章",
+            "similarity": 0.95,
+            "found": {
+                "explore":{
+                    "similarity": 0.95,
+                    "found": 1,
+                    "delay": 0.5
+                }
+            },
+            "delay": 0.5,
+            "notFound": {
+                "close": {
+                    "similarity": 0.95,
+                    "found": 1,
+                    "delay": 0.5
+                }
+            }
+        },
+        "award": {
+            "similarity": 0.95,
+            "found": 1,
+            "delay": 0.5,
+            "notFound": {
+                "fuben": {
+                    "similarity": 0.95,
+                    "found": 1,
+                    "delay": 0.5
+                }
+            }
+        },
+        "fight": {
+            "desc": "如果要优先打boss，则直接把 fight 和 boss 替换就可以",
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 0.5,
+            "notFound": {
+                "boss": {
+                    "similarity": 0.93,
+                    "found": 1,
+                    "delay": 1,
+                    "offsetX": 10,
+                    "offsetY": 10,
+                    "notFound": {
+                        "reward": {
+                            "similarity": 0.95,
+                            "found": 1,
+                            "delay": 0.3,
+                            "notFound": {
+                                "go": {
+                                    "similarity": 0.95,
+                                    "found": 1,
+                                    "delay": 0.5,
+                                    "offsetX": -350,
+                                    "offsetY": -30
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "win": {
+            "similarity": 0.95,
+            "found": 2,
+            "delay": 0.2,
+            "offsetY": -30
+        },
+        "end": {
+            "similarity": 0.95,
+            "found": 1,
+            "delay": 0.2,
+            "offsetX": 50,
+            "offsetY": 30
+        },
+        "showReward": {
+            "similarity": 0.95,
+            "found": 1,
+            "delay": 0.3,
+            "offsetX": 50
+        },
+        "error": {
+            "desc": "防止点到秘闻副本",
+            "similarity": 0.95,
+            "found": 1,
+            "delay": 0.2
+        }
+    }
+    
+}

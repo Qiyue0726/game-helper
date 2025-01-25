@@ -1,0 +1,24 @@
+{
+    "path": "emulator/yingjie/",
+    "timeCost": 15,
+    "endFlag": "end",
+    "failFlag": "fail",
+    "progressConfig": {
+        "start": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 1
+        },
+        "win": {
+            "similarity": 0.95,
+            "found": 2,
+            "delay": 0.2,
+            "offsetY": -30
+        },
+        "end": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 0.3
+        }
+    }
+}
