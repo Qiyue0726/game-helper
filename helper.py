@@ -10,14 +10,19 @@ from ppadb.client import Client
 import tkinter as tk
 from tkinter import messagebox
 from collections import deque
+from logger import Logger
 
 class Helper():
 
-    def __init__(self, num_runs=100, config_file_index = 0, host="127.0.0.1", port=5037):
+    def __init__(self, num_runs=100, config_file_index = 0, host="127.0.0.1", port=5037, logger=None):
         
         self.notCheck = []
         self.failCount = 0
         self.wait = False # 暂停
+        self.logger = logger
+        if self.logger is None:
+            logger = Logger('app')
+            self.logger = logger
 
         self.connect_to_device(host, port)
 
@@ -108,12 +113,15 @@ class Helper():
                 
                 except json.JSONDecodeError as e:
                     print(f"JSON 解析错误: {e}")
+                    self.logger.error(f"JSON 解析错误: {e}")
                     return
                 except FileNotFoundError:
                     print(f"文件未找到: {file}")
+                    self.logger.error(f"文件未找到: {file}")
                     return
                 except Exception as e:
                     print(f"发生其他错误: {e}")
+                    self.logger.error(f"发生其他错误: {e}")
                     return
 
         # Get the input for total running time
@@ -126,6 +134,8 @@ class Helper():
         print()
         print('配置文件：%s' % config_file)
         print('运行次数：%d' % num_runs)
+        self.logger.info(f"配置文件：{config_file}")
+        self.logger.info(f"运行次数：{num_runs}")
 
         # Initialize progressing bar with the total running times
         self.pbar = tqdm(total=num_runs, ascii=True)
@@ -232,12 +242,15 @@ class Helper():
         self.wait = not self.wait
         if self.wait == True:
             print('暂停运行，按 F12 继续运行')
+            self.logger.info('暂停运行')
         else:
             print('开始运行，按 F12 暂停运行')
+            self.logger.info('开始运行')
     
     def switchConfig(self,key):
-        self.wait = False      # 反正按了 F12 又按 F10
+        self.wait = False      # 防止按了 F12 又按 F10
         print('停止运行当前脚本，可以继续选择其他配置文件')
+        self.logger.info('手动停止运行当前脚本')
         self.pbar.n = self.pbar.total
 
     def run(self):
@@ -247,6 +260,7 @@ class Helper():
             while not self.wait:
                 
                 if self.pbar.n >= self.pbar.total:
+                    self.logger.info('任务完成')
                     return
                 
                 self.screenshot()
@@ -256,6 +270,7 @@ class Helper():
                 # 如果连续10次都是同一个图片，需要执行卡住后的流程
                 if len(self.queue) == 10 and len(set(self.queue)) == 1:
                     print('连续10次都是同一个图片，开始执行卡住后的流程')
+                    self.logger.warning('连续10次都是同一个图片，开始执行卡住后的流程')
                     for i in range(self.refreshNum):
                         self.screenshot()
                         self.recursion(self.refreshConfig)
@@ -278,6 +293,7 @@ class Helper():
                     if self.failCount%self.failNum == 0:
                         self.wait = True
                         print('暂停运行，按 F12 继续运行')
+                        self.logger.warning(f"失败 {self.failCount} 次 ！！！")
                         # messagebox.showwarning("警告", "失败 %d 次 ！！！\n暂停运行，按 F12 继续运行" % self.failCount)
                         result = messagebox.askyesno(
                                     "警告", f"失败 {self.failCount} 次 ！！！\n是否继续运行",

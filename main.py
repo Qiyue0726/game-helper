@@ -1,4 +1,5 @@
 from helper import Helper
+from logger import Logger
 import subprocess, os
 
 def connect_device_with_port_attempts(ip, base_port):
@@ -39,7 +40,8 @@ if __name__ == '__main__':
             connect_device_with_port_attempts(device_ip, start_port)
 
             flag = True
-            helper = Helper(config_file_index = 0)
+            logger = Logger('app')
+            helper = Helper(config_file_index = 0, logger = logger)
             helper.run()
             while flag:
                 con = input("是否继续运行其它任务？(Y/N):")
