@@ -1,0 +1,16 @@
+{
+    "path": "emulator/caozhi/",
+    "timeCost": 5,
+    "endFlag": "again",
+    "failFlag": "fail",
+    "stopFlag": "stop",
+    "progressConfig": {
+        "again": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 1,
+            "offsetX": 50,
+            "offsetY": 50
+        }
+    }
+}

@@ -107,6 +107,8 @@ class Helper():
                     if config.get('refreshConfig') is not None:
                         self.refreshConfig = config.pop("refreshConfig")
                         self.refreshNum = config.pop("refreshNum")
+                    else:
+                        self.refreshConfig = None
 
                     self.progressConfig = config.pop("progressConfig")
                     
@@ -269,11 +271,12 @@ class Helper():
 
                 # 如果连续10次都是同一个图片，需要执行卡住后的流程
                 if len(self.queue) == 10 and len(set(self.queue)) == 1:
-                    print('连续10次都是同一个图片，开始执行卡住后的流程')
-                    self.logger.warning('连续10次都是同一个图片，开始执行卡住后的流程')
-                    for i in range(self.refreshNum):
-                        self.screenshot()
-                        self.recursion(self.refreshConfig)
+                    if self.refreshConfig is not None:
+                        print('连续10次都是同一个图片，开始执行卡住后的流程')
+                        self.logger.warning('连续10次都是同一个图片，开始执行卡住后的流程')
+                        for i in range(self.refreshNum):
+                            self.screenshot()
+                            self.recursion(self.refreshConfig)
                     
                 # 一个完整流程结束，可能多次点击 
                 if self.now_img == self.endFlag:

@@ -96,7 +96,7 @@
             "similarity": 0.95,
             "found": 1,
             "delay": 0.3,
-            "offsetX": 50
+            "offsetX": 200
         },
         "error": {
             "desc": "防止点到秘闻副本",
