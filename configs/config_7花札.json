@@ -1,0 +1,28 @@
+{
+    "path": "emulator/huazha/",
+    "timeCost": 30,
+    "endFlag": "end",
+    "failFlag": "fail",
+    "progressConfig": {
+        "start": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 1,
+            "offsetX": 50,
+            "offsetY": 50
+        },
+        "win": {
+            "similarity": 0.95,
+            "found": 2,
+            "delay": 0.2,
+            "offsetY": -30
+        },
+        "end": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 2,
+            "offsetX": 50,
+            "offsetY": 30
+        }
+    }
+}

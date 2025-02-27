@@ -1,0 +1,42 @@
+{
+    "path": "emulator/chaoguiwang/",
+    "timeCost": 30,
+    "endFlag": "win",
+    "failFlag": "fail",
+    "progressConfig": {
+        "zhaohuan": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 2,
+            "offsetX": 50,
+            "offsetY": 50
+        },
+        "start": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 1,
+            "offsetX": 50,
+            "offsetY": 50
+        },
+        "win": {
+            "similarity": 0.95,
+            "found": 2,
+            "delay": 0.2,
+            "offsetY": -30
+        },
+        "end": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 2,
+            "offsetX": 50,
+            "offsetY": 30
+        },
+        "ready": {
+            "similarity": 0.93,
+            "found": 1,
+            "delay": 0.5,
+            "offsetX": 50,
+            "offsetY": 50
+        }
+    }
+}
