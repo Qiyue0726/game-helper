@@ -1,6 +1,6 @@
 {
     "path": "emulator/huazha/",
-    "timeCost": 30,
+    "timeCost": 5,
     "endFlag": "end",
     "failFlag": "fail",
     "progressConfig": {
